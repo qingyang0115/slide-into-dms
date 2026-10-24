@@ -33,6 +33,14 @@ const Story = {
     return !!this.data.scenes[id];
   },
 
+  // Scene id for the ending the tone counts earn, or null if story.json has no `endings` rules.
+  // Rules are checked in order; `when` maps tones to minimum counts, no `when` always matches.
+  pickEnding(tones) {
+    const rule = (this.data.endings || []).find((r) =>
+      Object.entries(r.when || {}).every(([tone, min]) => (tones[tone] || 0) >= min));
+    return rule ? rule.scene : null;
+  },
+
   // Every image the scenes mention, so main.js can preload them.
   assetNames() {
     const names = new Set(['bubble_speech.png']);
@@ -48,7 +56,7 @@ const Story = {
     const out = [];
     const warn = (msg) => { out.push(`[story] ${msg}`); console.warn(`[story] ${msg}`); };
     const known = (t) => {
-      if (['end', 'title', 'retry'].includes(t)) return true;
+      if (['end', 'title', 'retry', 'ending'].includes(t)) return true;
       const [kind, id] = t.split(':');
       if (kind === 'level') return levels.some((l) => l.id === id);
       if (kind === 'scene') return this.has(id);
@@ -62,6 +70,9 @@ const Story = {
         if (l.position && !(l.position in STORY_CONFIG.slots)) warn(`scene "${id}": bad position "${l.position}"`);
         if (l.effect && !['shake', 'bounce', 'slideIn', 'fadeIn'].includes(l.effect)) warn(`scene "${id}": bad effect "${l.effect}"`);
       }
+    }
+    for (const r of this.data.endings || []) {
+      if (!this.has(r.scene)) warn(`endings: unknown scene "${r.scene}"`);
     }
     for (const lv of levels) {
       for (const key of ['afterWin', 'afterFail']) {

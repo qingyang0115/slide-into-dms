@@ -110,7 +110,7 @@ function drawFullscreen(name) {
 
 // ---------- Flow ----------
 // Where to go next. Targets (same format as story.json "next" and levels.json afterWin/afterFail):
-//   level:<id>   scene:<id>   retry (replay the level just played)   end (win screen)   title
+//   level:<id>   scene:<id>   retry (replay the level just played)   ending (tone-based ending scene)   end (win screen)   title
 // If a scene doesn't exist (story.json missing or typo) we go to `fallback` so the game never dead-ends.
 function goTo(target, fallback) {
   const [kind, id] = target.split(':');
@@ -126,6 +126,10 @@ function goTo(target, fallback) {
       return goTo(fallback || 'end');
     }
     return Story.start(id);
+  }
+  if (target === 'ending') { // pick the ending scene from the tone counts (story.json "endings")
+    const sceneId = Story.pickEnding(progress.tones);
+    return sceneId ? goTo(`scene:${sceneId}`, 'end') : goTo('end');
   }
   if (target === 'retry') return setState('level');
   if (target === 'title') return setState('title');

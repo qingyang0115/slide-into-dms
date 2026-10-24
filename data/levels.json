@@ -1,59 +1,97 @@
 {
   "levels": [
     {
-      "id": "party",
-      "afterWin": "scene:after_party",
-      "afterFail": "scene:fail",
-      "crushMessage": "hey are u going to the party?",
+      "id": "apology",
+      "afterWin": "scene:after_apology",
+      "afterFail": "scene:fail_apology",
+      "crushMessage": "wait... are you the slipper who flattened me in the corridor?",
       "answers": [
-        { "words": ["yeah", "i'll", "be", "there"], "tone": "chill", "reply": "cool see u there" },
-        { "words": ["only", "if", "you", "are"], "tone": "flirty", "reply": "omg 😳" }
+        { "words": ["yes", "that", "was", "me", "apologies"], "tone": "chill", "reply": "it's ok! my ears are still ringing tho 🐰" },
+        { "words": ["the", "floor", "started", "it"], "tone": "unhinged", "reply": "...the floor. sure. ok." }
       ],
-      "badWords": ["u up?", "lol", "sorry", "k", "g"],
+      "badWords": ["sorry", "lol", "u up?", "my bad", "k", "ow"],
       "patterns": ["rain"],
       "bulletSpeed": 1.0,
       "timeLimit": 25,
-      "failReplies": ["seen 11:42pm", "???", "who is this"],
+      "failReplies": ["seen 9:41pm", "...who is this", "ok. i'm pretending that was a typo"],
       "deathPhrases": [
-        { "phrase": "i'll beg", "reply": "pls don't beg, it's literally just a party 😭" }
+        { "phrase": "that was meow", "reply": "...did you just meow at me?? i'm a BUNNY 😭" }
       ]
     },
     {
-      "id": "study",
-      "afterWin": "scene:after_study",
-      "afterFail": "scene:fail",
-      "crushMessage": "wanna study for the math test together?",
+      "id": "smalltalk",
+      "afterWin": "scene:after_smalltalk",
+      "afterFail": "scene:fail_smalltalk",
+      "crushMessage": "so what do you do for fun? besides tackling people in hallways",
       "answers": [
-        { "words": ["sure", "sounds", "good"], "tone": "chill", "reply": "great, library at 4?" },
-        { "words": ["i'd", "study", "anything", "with", "you"], "tone": "flirty", "reply": "...ok that was smooth" },
-        { "words": ["i", "am", "the", "math"], "tone": "unhinged", "reply": "wow ok. see u at 4" }
+        { "words": ["mostly", "naps", "honestly"], "tone": "chill", "reply": "same. naps are elite 😴" },
+        { "words": ["tackling", "you", "was", "my", "highlight"], "tone": "flirty", "reply": "flattering. get it? because you flattened me" },
+        { "words": ["i", "collect", "banana", "peels"], "tone": "unhinged", "reply": "...that explains the hallway." }
       ],
-      "badWords": ["u up?", "lol", "sorry", "k", "😳", "walrus"],
+      "badWords": ["sorry", "lol", "u up?", "my bad", "haha", "k", "bunnies"],
       "patterns": ["rain"],
-      "bulletSpeed": 1.2,
+      "bulletSpeed": 1.15,
       "timeLimit": 25,
-      "failReplies": ["did u just send that to the group chat", "typing... typing... nvm", "my phone auto-corrected u to 'weirdo'"],
+      "failReplies": ["...are you ok", "typing... typing... never mind", "i'm gonna go look at a wall now"],
       "deathPhrases": [
-        { "phrase": "i am the walrus", "reply": "...the WALRUS?? i have so many questions" }
+        { "phrase": "i collect bunnies", "reply": "...am i going in the collection?? 😭" }
       ]
     },
     {
-      "id": "who",
-      "afterWin": "scene:ending",
-      "afterFail": "scene:fail",
-      "crushMessage": "wait, is this the guy from math class?",
+      "id": "teasing",
+      "afterWin": "scene:after_teasing",
+      "afterFail": "scene:fail_teasing",
+      "crushMessage": "be honest. do you slip on purpose to meet people?",
       "answers": [
-        { "words": ["yeah", "that's", "me"], "tone": "chill", "reply": "oh nice, hi!" },
-        { "words": ["the", "cute", "one", "yes"], "tone": "flirty", "reply": "lol confident. i like it" },
-        { "words": ["i", "contain", "multitudes"], "tone": "unhinged", "reply": "...who ARE you" }
+        { "words": ["it", "was", "an", "accident"], "tone": "chill", "reply": "lol sure. a very convenient accident." },
+        { "words": ["worth", "it", "though", "right"], "tone": "flirty", "reply": "...ok that was smooth. annoyingly smooth." },
+        { "words": ["falling", "is", "my", "love", "language"], "tone": "unhinged", "reply": "that's the saddest love language. i love it." }
       ],
-      "badWords": ["u up?", "lol", "sorry", "k", "😳", "uhh", "um", "not"],
+      "badWords": ["sorry", "lol", "u up?", "my bad", "haha", "k", "um", "on purpose"],
       "patterns": ["rain"],
-      "bulletSpeed": 1.4,
+      "bulletSpeed": 1.3,
       "timeLimit": 25,
-      "failReplies": ["seen 11:42pm", "i'm gonna pretend i didn't read that", "blocked? no. but i'm thinking about it"],
+      "failReplies": ["lol what", "you good?", "that was a lot of words for one text"],
       "deathPhrases": [
-        { "phrase": "that's not me", "reply": "ok so then who am i talking to?? 😭" }
+        { "phrase": "it was on purpose", "reply": "ON PURPOSE?! you flattened me on PURPOSE?? 😭" }
+      ]
+    },
+    {
+      "id": "courage",
+      "afterWin": "scene:after_courage",
+      "afterFail": "scene:fail_courage",
+      "crushMessage": "btw the school dance is next week. are you going?",
+      "answers": [
+        { "words": ["maybe", "depends", "on", "the", "snacks"], "tone": "chill", "reply": "snacks are a valid reason. see you there!" },
+        { "words": ["my", "head", "says", "yes"], "tone": "flirty", "reply": "your head says yes. what does the rest of you say? 🐰" },
+        { "words": ["i", "will", "slide", "in", "dramatically"], "tone": "unhinged", "reply": "...please don't actually slide in. the floor is waxed." }
+      ],
+      "badWords": ["sorry", "lol", "u up?", "my bad", "haha", "k", "um", "uhh", "over heels"],
+      "patterns": ["rain"],
+      "bulletSpeed": 1.45,
+      "timeLimit": 25,
+      "failReplies": ["my phone auto-corrected you to 'nervous'", "i'm going to pretend i didn't read that", "seen 11:42pm"],
+      "deathPhrases": [
+        { "phrase": "head over heels", "reply": "head over heels?? we've known each other for one corridor 😳" }
+      ]
+    },
+    {
+      "id": "question",
+      "afterWin": "ending",
+      "afterFail": "scene:fail_question",
+      "crushMessage": "so... why are you really texting me, Finn?",
+      "answers": [
+        { "words": ["to", "become", "friends", "maybe"], "tone": "chill", "reply": "friends. yeah. i can do friends." },
+        { "words": ["walk", "with", "me", "tomorrow"], "tone": "flirty", "reply": "...i thought you'd never ask 🐰" },
+        { "words": ["i", "challenge", "you", "to", "sliding"], "tone": "unhinged", "reply": "a slide-off?? ...you're on." }
+      ],
+      "badWords": ["sorry", "lol", "u up?", "my bad", "haha", "k", "um", "uhh", "oops", "to the altar"],
+      "patterns": ["rain"],
+      "bulletSpeed": 1.6,
+      "timeLimit": 25,
+      "failReplies": ["...i need a minute", "i'm laughing but also a little scared", "seen 11:42pm (typing...)"],
+      "deathPhrases": [
+        { "phrase": "walk with me to the altar", "reply": "...the ALTAR?? slow down, Finn!! 😳" }
       ]
     }
   ]
