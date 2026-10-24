@@ -35,9 +35,13 @@ const Story = {
 
   // Scene id for the ending the tone counts earn, or null if story.json has no `endings` rules.
   // Rules are checked in order; `when` maps tones to minimum counts, no `when` always matches.
+  pickEndingRule(tones) {
+    return (this.data.endings || []).find((r) =>
+      Object.entries(r.when || {}).every(([tone, min]) => (tones[tone] || 0) >= min)) || null;
+  },
+
   pickEnding(tones) {
-    const rule = (this.data.endings || []).find((r) =>
-      Object.entries(r.when || {}).every(([tone, min]) => (tones[tone] || 0) >= min));
+    const rule = this.pickEndingRule(tones);
     return rule ? rule.scene : null;
   },
 

@@ -107,6 +107,15 @@ After the last level the ending scene is chosen from those counts by the `ending
 
 Levels must offer enough of each tone for every ending to be reachable (flirty answers exist in levels 2–5, unhinged in all five).
 
+## Title & end screens
+
+- **Title screen:** an **animated title** (the letters skid in from the left, then bob, and every few seconds the logo "slips" sideways and recovers), a **START button** (click, or Space/Enter), and **three ending icons** under the label "ENDINGS n / 3". An icon is a dark "?" silhouette until that ending has been cleared; then it lights up (glow, sparkles) and shows the ending's name. A small "reset progress" link (two clicks to confirm) erases the cleared endings.
+- **End screen** (after any ending scene): an **animated ending title** (the letters drop in and bounce), the name of the ending reached and the tone counts, the same three icons, and a **BACK TO START button** (click, Space/Enter or Esc). If this run cleared the ending for the first time, its icon **lights up with a burst** and "NEW ENDING UNLOCKED!" blinks.
+- **Game over screen** (only reachable when a failed level has no `afterFail` scene): animated "GAME OVER" with RETRY (same level) and START SCREEN buttons.
+- **Cleared endings are remembered** between visits in the browser's `localStorage` (key `sdm_endings_v1`). If storage is blocked they last for the session only. A run reaching an ending through the `ending` target records it; the `end` target without endings does not.
+- Logos and icons are **placeholders until the art exists**: a missing logo draws an animated text version with its filename underneath; a missing icon draws a coloured circle (lit) or a dark "?" (locked). When the real PNGs arrive, the same animations are applied to them. A logo may also be a spritesheet declared in `data/sprites.json` (see Spritesheet convention), in which case its frames animate too. The locked version of a real icon is the same image darkened by code, so only **one icon image per ending** is needed.
+- Layout numbers live in `SCREEN_CONFIG` (`screens.js`).
+
 ## Juice & sound
 
 - **Typing indicator:** each level opens with the crush's "typing..." bubble (bouncing dots, ~1.1s), then her message pops in, then the bullet phase starts. Space/click skips the wait. The result screen shows the same dots before her reply. Numbers: `GAME_CONFIG.intro`, `CONFIG.replyDelay`.
@@ -140,6 +149,7 @@ src/
   satisfaction.js # crush satisfaction meter (health) + crush face
   deathphrase.js # death phrase matching, telegraph check, level validation
   notifications.js # group chat sabotage: notification banners, dismissing, anxiety
+  screens.js     # title + end/game over screens, buttons, animated logos, ending icons, cleared-endings save
   assets.js      # asset loading with placeholder fallback
   audio.js       # sound effects (synthesized with WebAudio, optional real files)
 data/
@@ -171,6 +181,9 @@ assets/
 | `bubble_crush.png`, `bubble_player.png` | Chat bubbles (9-slice if possible) | stretchable |
 | `chip_good.png`, `chip_bad.png` | Word bullet backgrounds (text drawn on top in code) | stretchable |
 | `fx_sweat_vignette.png` | High-anxiety overlay | full screen |
+| `title_logo.png` | Title screen logo ("Slide Into DMs"). Animated by code (slide-in, bob, slip); may also be a spritesheet listed in `data/sprites.json` | ~380×190 (760×380 export) |
+| `ending_title.png` | End screen title ("The End"). Animated by code (drops in and bounces); may also be a spritesheet | ~380×150 (760×300 export) |
+| `icon_ending_good.png`, `icon_ending_neutral.png`, `icon_ending_bad.png` | One icon per ending (name = `icon_ending_<id>.png`, the `id` from `story.json` `endings`). Drawn full-colour and glowing once cleared; the code darkens the same image into a silhouette while locked | 64×64 (128×128 export) |
 | `notif_banner.png` | Group chat notification banner background. Stretchable; **keep the centre plain**, the sender and message text are drawn in code on top | 360×80 (720×160 export) |
 | `notif_avatar_<sender>.png` (optional), e.g. `notif_avatar_zig.png`, `notif_avatar_junhao.png`, `notif_avatar_aisyah.png`, `notif_avatar_canvas.png`, `notif_avatar_shopee.png`, `notif_avatar_grab.png` | Sender avatar on a banner. `<sender>` is the sender name lowercased with spaces removed. Missing ones show a labeled placeholder | 40×40 (80×80 export) |
 | `screen_title.png`, `screen_gameover.png`, `screen_ending.png` | Menus | full screen |
@@ -259,7 +272,7 @@ All dialogue is data. Rewriting the story must never require code changes.
 
 - `next` (and a level's `afterWin` / `afterFail`) is a target: `level:<id>`, `scene:<id>`, `retry` (replay the level that was just played), `ending` (pick an ending scene from the tone counts, see `endings` below), `end` (win screen) or `title`. If `afterWin` / `afterFail` is missing, a won level goes to the next level (or `end` after the last) and a failed level goes to the game over screen. A target scene that doesn't exist is skipped, so the game never dead-ends.
 - `speakers` (top-level, optional) maps a line's `speaker` id to the name shown on the name tag, e.g. `{ "player": "You", "friend": "Jo", "crush": "Sam" }`. Lines with no `sprite` are narration (no highlighted character). `position` is `left`, `center` or `right`; a character stays on screen until another sprite takes their position.
-- `endings` (top-level, optional) is a list of `{ "scene", "when" }` rules checked in order when a target is `ending`; the first rule whose `when` holds wins. `when` maps tones to minimum counts (`{ "flirty": 3 }`); a rule with no `when` always matches (use it last as the default). Without `endings` the game goes straight to the win screen.
+- `endings` (top-level, optional) is a list of `{ "scene", "when", "id", "name", "slot" }` rules checked in order when a target is `ending`; the first rule whose `when` holds wins. `id` (default: the scene id) names the icon file and the save entry, `name` is shown under the icon and on the end screen, and `slot` is the icon's position on the title screen (left to right; default: list order, which matters for matching, so set `slot` to display them differently). `when` maps tones to minimum counts (`{ "flirty": 3 }`); a rule with no `when` always matches (use it last as the default). Without `endings` the game goes straight to the win screen.
 - A scene has **one background**. To change location mid-story, chain scenes with `next` (the intro does this: corridor, then Finn's bedroom).
 - On load the game warns in the console about unknown targets, bad positions/effects and empty scenes. `data/story.json` is optional: without it, scenes are skipped.
 - `effect` (optional): `shake`, `bounce`, `slideIn`, `fadeIn`.
@@ -288,7 +301,7 @@ Make one pattern feel good before adding the next.
 6. Story system: `story.json` loading, background, sprites with the spritesheet helper, speech bubbles, typewriter, advance/skip, effects. Wire scenes into the game flow with `next` / `afterWin` / `afterFail`.
 7. Remaining patterns (`aimed`, `spiral`, `wall`). (Branching answers/tones and the tone-based ending pick are already in.)
 8. Juice: typing indicator, hit flash, send whoosh, screen shake, sound effects, transitions between story and gameplay.
-9. Title screen, game over + retry, ending screen. Prepare the itch.io zip.
+9. Title screen, game over + retry, ending screen (done: see "Title & end screens"). Prepare the itch.io zip.
 
 **Extra mechanic (added after step 8):** group chat sabotage (notification banners), described above.
 

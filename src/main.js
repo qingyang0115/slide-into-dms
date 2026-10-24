@@ -36,6 +36,8 @@ const PRELOAD = [
   'screen_title.png',
   'screen_gameover.png',
   'screen_ending.png',
+  'title_logo.png',
+  'ending_title.png',
 ];
 
 const canvas = document.getElementById('canvas');
@@ -102,11 +104,15 @@ const progress = {
   levelIndex: 0,
   lastResult: null, // { success, outcome, entries, reply, tone }
   won: false,       // true when the run ends on the win screen
+  ending: null,     // the story.json ending rule this run reached (null if none)
+  newEnding: false, // true if this run cleared that ending for the first time
   tones: { chill: 0, flirty: 0, unhinged: 0 }, // counts of completed answers (drives the ending, step 7)
   reset() {
     this.levelIndex = 0;
     this.lastResult = null;
     this.won = false;
+    this.ending = null;
+    this.newEnding = false;
     this.tones = { chill: 0, flirty: 0, unhinged: 0 };
   },
 };
@@ -146,8 +152,11 @@ function goTo(target, fallback) {
     return Story.start(id);
   }
   if (target === 'ending') { // pick the ending scene from the tone counts (story.json "endings")
-    const sceneId = Story.pickEnding(progress.tones);
-    return sceneId ? goTo(`scene:${sceneId}`, 'end') : goTo('end');
+    const rule = Story.pickEndingRule(progress.tones);
+    if (!rule) return goTo('end');
+    progress.ending = rule;                                  // remembered for the end screen
+    progress.newEnding = Endings.unlock(rule.id || rule.scene); // lights up its icon on the title screen
+    return goTo(`scene:${rule.scene}`, 'end');
   }
   if (target === 'retry') return setState('level');
   if (target === 'title') return setState('title');
@@ -178,22 +187,6 @@ const OUTCOME_NOTES = {
 
 // ---------- States ----------
 const states = {
-  title: {
-    enter() {
-      progress.reset();
-    },
-    draw() {
-      drawFullscreen('screen_title.png');
-      drawCenteredText('SLIDE INTO DMs', 300, 40);
-      drawCenteredText('press Space / click to start', 520, 18, '#ffd');
-      drawCenteredText(Sfx.muted ? 'M: unmute sound' : 'M: mute sound', 720, 12, '#ccc');
-    },
-    onConfirm() {
-      Sfx.play('click');
-      goTo('scene:intro', `level:${levelData.levels[0].id}`);
-    },
-  },
-
   level: {
     enter() {
       Game.start(levelData.levels[progress.levelIndex]);
@@ -364,30 +357,11 @@ const states = {
       afterLevel(progress.lastResult.success);
     },
   },
-
-  // Doubles as the win screen ("end" target) until the real ending screen exists (build steps 7/9).
-  gameover: {
-    enter() {
-      this.won = progress.won;
-    },
-    draw() {
-      drawFullscreen(this.won ? 'screen_ending.png' : 'screen_gameover.png');
-      drawCenteredText(this.won ? 'THE END' : 'GAME OVER', 300, 40);
-      drawCenteredText(this.won ? 'Space / click: back to title' : 'Space / click: retry level', 520, 18, '#ffd');
-      if (!this.won) drawCenteredText('Esc: back to title', 560, 14, '#ccc');
-    },
-    onConfirm() {
-      Sfx.play('click');
-      if (this.won) setState('title');
-      else setState('level'); // retry the level that was failed
-    },
-    onKey(code) {
-      if (code === 'Escape') setState('title');
-    },
-  },
 };
 
-states.story = Story; // story.js is the 'story' state
+states.story = Story;          // story.js is the 'story' state
+states.title = TitleScreen;    // screens.js: title screen
+states.gameover = EndScreen;   // screens.js: win ("end") and game over screens
 
 let current = null;
 let currentName = '';
@@ -468,9 +442,10 @@ Promise.all([
   Sprites.setDefs(sprites);
   if (story) Story.setData(story);
   else console.warn('data/story.json missing or invalid: story scenes are skipped');
+  Endings.load(); // which endings the player has cleared before
   Story.validate(levelData.levels); // console.warns broken scene links
   // backgrounds, story sprites, notification banner + avatars (missing ones become placeholders)
-  return Assets.loadAll([...Story.assetNames(), ...Notifs.assetNames(levelData.levels)]);
+  return Assets.loadAll([...Story.assetNames(), ...Notifs.assetNames(levelData.levels), ...Endings.assetNames()]);
 }).then(() => {
   setState('title');
   requestAnimationFrame(frame);

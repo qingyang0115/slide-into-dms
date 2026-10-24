@@ -157,8 +157,8 @@
   },
 
   "endings": [
-    { "scene": "ending_bad", "when": { "unhinged": 3 } },
-    { "scene": "ending_good", "when": { "flirty": 3 } },
-    { "scene": "ending_neutral" }
+    { "scene": "ending_bad", "when": { "unhinged": 3 }, "id": "bad", "name": "One last slip", "slot": 2 },
+    { "scene": "ending_good", "when": { "flirty": 3 }, "id": "good", "name": "Walk to class", "slot": 0 },
+    { "scene": "ending_neutral", "id": "neutral", "name": "Just friends", "slot": 1 }
   ]
 }
