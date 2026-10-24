@@ -199,6 +199,7 @@ assets/
 - Frame size and count are declared in `data/sprites.json`, e.g. `{ "story_player_nervous_sheet.png": { "frameWidth": 400, "frameHeight": 600, "frames": 4, "fps": 6, "loop": true } }`. Claude adds entries here; the artist updates the numbers if they change.
 - A single non-sheet PNG must also work (treated as 1 frame).
 - If a sheet is missing, show a labeled placeholder that still "animates" (e.g. bobs) so timing can be tested.
+- Edits show up on a **normal reload**: `data/*.json` is re-checked on every load, and on `localhost` images get a cache-busting query so re-exported PNGs aren't served from the browser cache. (Before this, a stale `sprites.json` made a fixed sheet keep showing all frames side by side.) If a sheet still looks wrong, check that `frameWidth × frames` equals the image width and `frameHeight` equals its height.
 
 If an asset is added that isn't in this table, add it to the table.
 

@@ -5,6 +5,10 @@
 const Assets = (() => {
   const ART_DIR = 'assets/art/';
   const images = {}; // filename -> { img, ok, width, height }
+  // On a local dev server, add a changing query so a re-exported PNG shows up on the next reload instead of
+  // the browser's cached copy. Published builds (itch.io etc.) keep normal caching.
+  const DEV = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+  const cacheBust = DEV ? `?v=${Date.now()}` : '';
 
   // Pick a stable color per filename so placeholders are easy to tell apart.
   function placeholderColor(name) {
@@ -28,7 +32,7 @@ const Assets = (() => {
         console.warn(`[assets] missing ${ART_DIR}${name}, using placeholder`);
         resolve(entry);
       };
-      entry.img.src = ART_DIR + name;
+      entry.img.src = ART_DIR + name + cacheBust;
     });
     return entry.promise;
   }

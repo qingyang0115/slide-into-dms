@@ -420,11 +420,13 @@ function showBootError(msg) {
 }
 
 // Optional data files: the game stays playable without them (no story / no sprite sheets).
-const fetchOptionalJSON = (url) => fetch(url).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+// cache: 'no-cache' makes the browser re-check the file on every load, so edits to data/*.json show up on a
+// normal reload (otherwise a simple dev server lets the browser reuse an old copy for a while).
+const fetchOptionalJSON = (url) => fetch(url, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 
 Promise.all([
   Assets.loadAll(PRELOAD),
-  fetch('data/levels.json').then((r) => {
+  fetch('data/levels.json', { cache: 'no-cache' }).then((r) => {
     if (!r.ok) throw new Error(`levels.json: HTTP ${r.status}`);
     return r.json();
   }),

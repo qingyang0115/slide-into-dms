@@ -54,7 +54,7 @@ const Sfx = {
   // Optional real files from data/sfx.json. A missing/broken file just keeps the synth sound.
   loadFiles() {
     for (const [name, file] of Object.entries(this.manifest)) {
-      fetch(`assets/sfx/${file}`)
+      fetch(`assets/sfx/${file}`, { cache: 'no-cache' })
         .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(`HTTP ${r.status}`))))
         .then((data) => this.ac.decodeAudioData(data))
         .then((buf) => { this.buffers[name] = buf; })
