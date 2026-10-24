@@ -11,6 +11,8 @@ const CONFIG = {
 // Every image the game may use. Missing ones become labeled placeholders.
 const PRELOAD = [
   'bg_phone.png',
+  'player_heart.png',
+  'chip_bad.png',
   'screen_title.png',
   'screen_gameover.png',
   'screen_ending.png',
@@ -40,8 +42,9 @@ window.addEventListener('keydown', (e) => {
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (e.repeat) return;
   input.keys.add(e.code);
-  if (current && current.onKey) current.onKey(e.code);
-  if ((e.code === 'Space' || e.code === 'Enter') && current && current.onConfirm) current.onConfirm();
+  const state = current; // onKey may switch state; don't let the same keypress hit the new one
+  if (state && state.onKey) state.onKey(e.code);
+  if (state === current && (e.code === 'Space' || e.code === 'Enter') && state.onConfirm) state.onConfirm();
 });
 window.addEventListener('keyup', (e) => input.keys.delete(e.code));
 window.addEventListener('blur', () => input.keys.clear());
@@ -94,8 +97,10 @@ const states = {
   level: {
     enter() {
       this.timeLeft = CONFIG.placeholderLevelTime;
+      Game.start();
     },
     update(dt) {
+      Game.update(dt);
       this.timeLeft -= dt;
       if (this.timeLeft <= 0) this.send(false);
     },
@@ -108,13 +113,15 @@ const states = {
     },
     draw() {
       drawFullscreen('bg_phone.png');
-      drawCenteredText(`LEVEL ${progress.levelIndex + 1}`, 200, 32);
-      drawCenteredText('(bullet phase goes here)', 260, 16, '#ddd');
-      drawCenteredText(`auto-send in ${Math.ceil(this.timeLeft)}`, 400, 22, '#ffd');
-      drawCenteredText('debug: W = clean send, L = garbled send', 600, 14, '#ccc');
+      drawCenteredText(`LEVEL ${progress.levelIndex + 1}`, 60, 28);
+      drawCenteredText(`auto-send in ${Math.ceil(this.timeLeft)}`, 110, 18, '#ffd');
+      drawCenteredText('debug: Enter = clean send, L = garbled send', 150, 12, '#ccc');
+      drawCenteredText('move: WASD / arrows   slow: Shift', 180, 12, '#ccc');
+      Game.draw();
     },
+    // W is now "up", so the debug clean-send moved to Enter (not onConfirm: clicks/Space shouldn't end the level).
     onKey(code) {
-      if (code === 'KeyW') this.send(true);
+      if (code === 'Enter') this.send(true);
       if (code === 'KeyL') this.send(false);
     },
   },
