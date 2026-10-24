@@ -1,8 +1,8 @@
-// Bullet phase: player movement, bullets, collisions.
-// Reply bar / good words (step 3), timer + send (step 4) and anxiety (step 5) plug in here later.
+// Bullet phase: player movement, bad-word bullets, good words, reply assembly, collisions.
+// Timer + crush reply (step 4) and anxiety (step 5) plug in here later.
 
 const GAME_CONFIG = {
-  // Play area inside the phone screen (logical px). Chat UI will sit above it.
+  // Play area inside the phone screen (logical px). Chat UI sits above it.
   area: { x: 15, y: 280, w: 420, h: 480 },
   player: {
     speed: 260,       // px/sec
@@ -14,31 +14,82 @@ const GAME_CONFIG = {
     height: 28,
     padX: 10,
     font: 'bold 15px system-ui, sans-serif',
-    hitShrink: 0.8, // bullet hitbox is a bit smaller than its drawn chip
+    hitShrink: 0.8, // bad-word hitbox is a bit smaller than its drawn chip
   },
-  hitInvulnTime: 1.0, // seconds of invulnerability (blinking) after a hit
-  badWords: ['u up?', 'lol', 'k', 'sorry', '😳'], // fallback until levels.json (step 4)
-  patterns: ['rain'],                              // fallback until levels.json (step 4)
+  good: {
+    speed: 55,          // px/sec drift speed of good words
+    hitScale: 1.2,      // good-word hitbox is bigger than its drawn chip (generous)
+    respawnDelay: 0.6,  // seconds before a missing good word comes back
+  },
+  hitInvulnTime: 1.0, // seconds of invulnerability (blinking) after a mistake
+
+  // Stand-in until levels.json loading lands (build step 4). Same shape as the data format.
+  fallbackLevel: {
+    id: 'party',
+    crushMessage: 'hey are u going to the party?',
+    answers: [
+      { words: ['yeah', "i'll", 'be', 'there'], tone: 'chill', reply: 'cool see u there' },
+      { words: ['only', 'if', 'you', 'are'], tone: 'flirty', reply: 'omg 😳' },
+    ],
+    badWords: ['u up?', 'lol', 'k', 'sorry', '😳'],
+    patterns: ['rain'],
+    bulletSpeed: 1.0,
+    timeLimit: 20,
+    failReplies: ['seen 11:42pm', '???', 'who is this'],
+  },
 };
 
 const Game = {
   area: GAME_CONFIG.area,
+  level: null,
   player: null,
-  bullets: [],
+  bullets: [],      // bad words
+  goods: [],        // good words: { text, answer, index, x, y, vx, vy, w, h }
+  pending: {},      // good-word key -> seconds until it (re)spawns
+  entries: [],      // the reply bar: { text, kind: 'good' | 'bad' | 'misplaced' }
+  locked: null,     // index of the answer the player committed to (null until first good word)
+  next: 0,          // index of the next word needed in the locked answer
+  done: false,      // sentence completed
   hits: 0,
   time: 0,
-  badWords: GAME_CONFIG.badWords,
-  patternNames: GAME_CONFIG.patterns,
+  badWords: [],
+  patternNames: [],
   patternState: {},
 
-  start() {
+  start(level) {
+    this.level = level || GAME_CONFIG.fallbackLevel;
     const a = this.area;
     this.player = { x: a.x + a.w / 2, y: a.y + a.h - 60, invuln: 0, focus: false };
     this.bullets = [];
+    this.goods = [];
+    this.pending = {};
+    this.entries = [];
+    this.locked = null;
+    this.next = 0;
+    this.done = false;
     this.hits = 0;
     this.time = 0;
+    this.badWords = this.level.badWords;
+    this.patternNames = this.level.patterns;
     this.patternState = {};
   },
+
+  // ----- Result (read by main.js when the level ends) -----
+
+  message() {
+    return this.entries.map((e) => e.text).join(' ');
+  },
+
+  // Clean = the whole sentence was collected with no bad or misplaced words in it.
+  isClean() {
+    return this.done && this.entries.every((e) => e.kind === 'good');
+  },
+
+  lockedAnswer() {
+    return this.locked === null ? null : this.level.answers[this.locked];
+  },
+
+  // ----- Bad words -----
 
   randomBadWord() {
     return this.badWords[Math.floor(Math.random() * this.badWords.length)];
@@ -49,14 +100,18 @@ const Game = {
     return Math.ceil(ctx.measureText(text).width) + GAME_CONFIG.chip.padX * 2;
   },
 
-  // x/y is the chip center.
+  // x/y is the chip center. Velocity is scaled by the level's bulletSpeed.
   spawnBullet(b) {
+    const s = this.level.bulletSpeed || 1;
+    b.vx *= s;
+    b.vy *= s;
     b.w = this.measureChip(b.text);
     b.h = GAME_CONFIG.chip.height;
     this.bullets.push(b);
   },
 
   update(dt) {
+    if (this.done) return;
     this.time += dt;
     this.updatePlayer(dt);
 
@@ -67,6 +122,8 @@ const Game = {
     }
 
     this.updateBullets(dt);
+    this.syncGoods(dt);
+    this.updateGoods(dt);
   },
 
   updatePlayer(dt) {
@@ -96,7 +153,6 @@ const Game = {
   updateBullets(dt) {
     const p = this.player;
     const a = this.area;
-    const shrink = GAME_CONFIG.chip.hitShrink;
 
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const b = this.bullets[i];
@@ -111,32 +167,137 @@ const Game = {
         continue;
       }
 
-      if (p.invuln <= 0 && this.circleHitsRect(p.x, p.y, GAME_CONFIG.player.hitRadius, b, shrink)) {
+      if (p.invuln <= 0 && this.circleHitsRect(p.x, p.y, GAME_CONFIG.player.hitRadius, b, GAME_CONFIG.chip.hitShrink)) {
         this.onBadHit(b);
         this.bullets.splice(i, 1);
       }
     }
   },
 
-  circleHitsRect(cx, cy, r, b, shrink) {
-    const hw = (b.w * shrink) / 2;
-    const hh = (b.h * shrink) / 2;
+  circleHitsRect(cx, cy, r, b, scale) {
+    const hw = (b.w * scale) / 2;
+    const hh = (b.h * scale) / 2;
     const nx = Math.max(b.x - hw, Math.min(cx, b.x + hw));
     const ny = Math.max(b.y - hh, Math.min(cy, b.y + hh));
     const dx = cx - nx, dy = cy - ny;
     return dx * dx + dy * dy <= r * r;
   },
 
-  // Step 3 will insert the word into the message; step 5 will raise anxiety.
+  // Bad word touched: it gets inserted into the message. (Step 5 adds anxiety here.)
   onBadHit(b) {
     this.hits++;
+    this.entries.push({ text: b.text, kind: 'bad' });
     this.player.invuln = GAME_CONFIG.hitInvulnTime;
   },
+
+  // ----- Good words -----
+
+  // Which good words should exist right now: before the player commits, the first word
+  // of every answer; after, every word of the locked answer not yet collected.
+  neededGoods() {
+    const answers = this.level.answers;
+    const out = [];
+    if (this.locked === null) {
+      answers.forEach((ans, ai) => out.push({ answer: ai, index: 0, text: ans.words[0] }));
+    } else {
+      const words = answers[this.locked].words;
+      for (let i = this.next; i < words.length; i++) out.push({ answer: this.locked, index: i, text: words[i] });
+    }
+    return out;
+  },
+
+  // Spawns missing good words (after a short delay) and drops ones no longer needed.
+  syncGoods(dt) {
+    const needed = this.neededGoods();
+    const keyOf = (n) => n.answer + ':' + n.index;
+    const neededKeys = new Set(needed.map(keyOf));
+
+    this.goods = this.goods.filter((g) => neededKeys.has(keyOf(g)));
+    for (const key of Object.keys(this.pending)) {
+      if (!neededKeys.has(key)) delete this.pending[key];
+    }
+
+    for (const n of needed) {
+      const key = keyOf(n);
+      if (this.goods.some((g) => keyOf(g) === key)) continue;
+      if (this.pending[key] === undefined) this.pending[key] = GAME_CONFIG.good.respawnDelay;
+      this.pending[key] -= dt;
+      if (this.pending[key] <= 0) {
+        delete this.pending[key];
+        this.spawnGood(n);
+      }
+    }
+  },
+
+  spawnGood(n) {
+    const a = this.area;
+    const w = this.measureChip(n.text);
+    const angle = Math.random() * Math.PI * 2;
+    const speed = GAME_CONFIG.good.speed;
+    this.goods.push({
+      ...n,
+      w,
+      h: GAME_CONFIG.chip.height,
+      x: a.x + w / 2 + Math.random() * (a.w - w),
+      y: a.y + 30 + Math.random() * (a.h * 0.4), // upper part, away from the player's start
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+    });
+  },
+
+  // Is this good word the one the player needs right now?
+  isNextWord(g) {
+    if (this.locked === null) return g.index === 0;
+    return g.answer === this.locked && g.index === this.next;
+  },
+
+  updateGoods(dt) {
+    const p = this.player;
+    const a = this.area;
+
+    for (let i = this.goods.length - 1; i >= 0; i--) {
+      const g = this.goods[i];
+      g.x += g.vx * dt;
+      g.y += g.vy * dt;
+
+      // Drift around inside the play area, bouncing off the walls.
+      if (g.x - g.w / 2 < a.x) { g.x = a.x + g.w / 2; g.vx = Math.abs(g.vx); }
+      if (g.x + g.w / 2 > a.x + a.w) { g.x = a.x + a.w - g.w / 2; g.vx = -Math.abs(g.vx); }
+      if (g.y - g.h / 2 < a.y) { g.y = a.y + g.h / 2; g.vy = Math.abs(g.vy); }
+      if (g.y + g.h / 2 > a.y + a.h) { g.y = a.y + a.h - g.h / 2; g.vy = -Math.abs(g.vy); }
+
+      if (!this.circleHitsRect(p.x, p.y, GAME_CONFIG.player.hitRadius, g, GAME_CONFIG.good.hitScale)) continue;
+
+      if (this.isNextWord(g)) {
+        this.collectGood(g);
+        this.goods.splice(i, 1);
+      } else if (p.invuln <= 0) {
+        // Right word, wrong time: it lands in the message anyway. It respawns so the
+        // sentence can still be finished (but the message is now garbled).
+        this.entries.push({ text: g.text, kind: 'misplaced' });
+        p.invuln = GAME_CONFIG.hitInvulnTime;
+        this.goods.splice(i, 1);
+      }
+    }
+  },
+
+  collectGood(g) {
+    this.entries.push({ text: g.text, kind: 'good' });
+    if (this.locked === null) {
+      this.locked = g.answer; // first word picks which sentence we're building
+      this.next = 1;
+    } else {
+      this.next++;
+    }
+    if (this.next >= this.level.answers[this.locked].words.length) this.done = true;
+  },
+
+  // ----- Drawing -----
 
   draw() {
     const a = this.area;
 
-    // Play area backdrop + clipped bullets.
+    // Play area backdrop; everything inside is clipped to it.
     ctx.save();
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
     ctx.fillRect(a.x, a.y, a.w, a.h);
@@ -146,38 +307,13 @@ const Game = {
     ctx.beginPath();
     ctx.rect(a.x, a.y, a.w, a.h);
     ctx.clip();
-    for (const b of this.bullets) this.drawChip(b);
+    for (const g of this.goods) {
+      const glow = this.isNextWord(g) ? 0.6 + 0.4 * Math.sin(this.time * 6) : 0;
+      Chat.chip('good', g.text, g.x, g.y, g.w, g.h, { glow });
+    }
+    for (const b of this.bullets) Chat.chip('bad', b.text, b.x, b.y, b.w, b.h);
     this.drawPlayer();
     ctx.restore();
-
-    // Debug HUD (replaced by real chat UI / anxiety bar in later steps).
-    ctx.save();
-    ctx.fillStyle = '#fff';
-    ctx.font = '14px monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText(`hits: ${this.hits}`, a.x, a.y - 12);
-    ctx.restore();
-  },
-
-  drawChip(b) {
-    const x = b.x - b.w / 2, y = b.y - b.h / 2;
-    if (Assets.has('chip_bad.png')) {
-      Assets.draw(ctx, 'chip_bad.png', x, y, b.w, b.h);
-    } else {
-      // Placeholder chip: the word itself is the label.
-      ctx.fillStyle = '#c0392b';
-      ctx.strokeStyle = '#ffd';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(x, y, b.w, b.h, b.h / 2);
-      ctx.fill();
-      ctx.stroke();
-    }
-    ctx.fillStyle = '#fff';
-    ctx.font = GAME_CONFIG.chip.font;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(b.text, b.x, b.y + 1);
   },
 
   drawPlayer() {

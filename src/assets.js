@@ -70,7 +70,7 @@ const Assets = (() => {
       size -= 1;
       ctx.font = `${size}px monospace`;
     }
-    const labelY = h > 150 ? y + h - 20 : y + h / 2;
+    const labelY = h > 150 ? y + h - 10 : y + h / 2;
     ctx.fillText(name, x + w / 2, labelY);
     ctx.restore();
   }

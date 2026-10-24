@@ -5,7 +5,6 @@ const CONFIG = {
   height: 800,
   // Placeholder level count until levels.json loading lands (build step 4).
   placeholderLevelCount: 2,
-  placeholderLevelTime: 5, // seconds before the stub level auto-"sends"
 };
 
 // Every image the game may use. Missing ones become labeled placeholders.
@@ -13,6 +12,10 @@ const PRELOAD = [
   'bg_phone.png',
   'player_heart.png',
   'chip_bad.png',
+  'chip_good.png',
+  'bubble_crush.png',
+  'bubble_player.png',
+  'char_crush_neutral.png',
   'screen_title.png',
   'screen_gameover.png',
   'screen_ending.png',
@@ -93,36 +96,35 @@ const states = {
     },
   },
 
-  // Stub level: real bullet phase arrives in build steps 2–4.
+  // Level data still comes from Game's fallbackLevel; levels.json loading is step 4.
   level: {
     enter() {
-      this.timeLeft = CONFIG.placeholderLevelTime;
       Game.start();
+      this.timeLeft = Game.level.timeLimit;
     },
     update(dt) {
       Game.update(dt);
+      if (Game.done) return this.send();
       this.timeLeft -= dt;
-      if (this.timeLeft <= 0) this.send(false);
+      if (this.timeLeft <= 0) this.send(); // out of time: sends whatever is in the bar
     },
-    send(success) {
+    // Turns the bar into the sent message. Crush reply is a stub until step 4.
+    send() {
+      const success = Game.isClean();
+      const answer = Game.lockedAnswer();
+      const fails = Game.level.failReplies;
       progress.lastResult = {
         success,
-        message: success ? 'yeah i\'ll be there' : 'yeah lol u up? sorry',
+        message: Game.message(),
+        reply: success ? answer.reply : fails[Math.floor(Math.random() * fails.length)],
       };
       setState('result');
     },
     draw() {
       drawFullscreen('bg_phone.png');
-      drawCenteredText(`LEVEL ${progress.levelIndex + 1}`, 60, 28);
-      drawCenteredText(`auto-send in ${Math.ceil(this.timeLeft)}`, 110, 18, '#ffd');
-      drawCenteredText('debug: Enter = clean send, L = garbled send', 150, 12, '#ccc');
-      drawCenteredText('move: WASD / arrows   slow: Shift', 180, 12, '#ccc');
+      Chat.draw(Game.level.crushMessage, Game.entries);
       Game.draw();
-    },
-    // W is now "up", so the debug clean-send moved to Enter (not onConfirm: clicks/Space shouldn't end the level).
-    onKey(code) {
-      if (code === 'Enter') this.send(true);
-      if (code === 'KeyL') this.send(false);
+      drawCenteredText(`level ${progress.levelIndex + 1}   time ${Math.max(0, Math.ceil(this.timeLeft))}   move: WASD/arrows, slow: Shift`, 772, 12, '#eee');
     },
   },
 
@@ -130,9 +132,10 @@ const states = {
     draw() {
       const r = progress.lastResult;
       drawFullscreen('bg_phone.png');
-      drawCenteredText('you sent:', 220, 18, '#ddd');
-      drawCenteredText(`"${r.message}"`, 260, 22);
-      drawCenteredText(r.success ? 'crush: cool see u there' : 'seen 11:42pm', 360, 22, r.success ? '#9f9' : '#f99');
+      drawCenteredText('you sent:', 200, 18, '#ddd');
+      const lines = Chat.wrapLines(r.message || '(nothing...)', 380, 'bold 22px system-ui, sans-serif');
+      lines.forEach((l, i) => drawCenteredText(l, 240 + i * 30, 22));
+      drawCenteredText(r.reply, 240 + lines.length * 30 + 60, 22, r.success ? '#9f9' : '#f99');
       drawCenteredText('press Space / click', 600, 16, '#ffd');
     },
     onConfirm() {
