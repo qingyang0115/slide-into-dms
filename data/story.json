@@ -39,10 +39,10 @@
     "group_chat": {
       "background": "bg_bedroom.png",
       "lines": [
-        { "text": "buzz. buzz. buzz. the group chat \"2E3 Slide Squad\" has found out." },
-        { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "ok i may have told them. only a little." },
+        { "text": "**buzz. buzz. buzz.**" },
+        { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "right... i may have told the groupchat. only a little." },
         { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "my phone won't STOP buzzing!!", "effect": "shake" },
-        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "ok. i can swipe them away. click them, or press Q. i can multitask." }
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "ummmm it's okay!! i can swipe them away. click them, or press Q. i can multitask." }
       ],
       "next": "level:smalltalk"
     },
