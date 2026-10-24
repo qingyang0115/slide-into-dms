@@ -92,6 +92,15 @@ After the last level the ending scene is chosen from those counts by the `ending
 
 Levels must offer enough of each tone for every ending to be reachable (flirty answers exist in levels 2–5, unhinged in all five).
 
+## Juice & sound
+
+- **Typing indicator:** each level opens with the crush's "typing..." bubble (bouncing dots, ~1.1s), then her message pops in, then the bullet phase starts. Space/click skips the wait. The result screen shows the same dots before her reply. Numbers: `GAME_CONFIG.intro`, `CONFIG.replyDelay`.
+- **Hit flash:** touching a bad word flashes the screen red and jolts it (an out-of-order word flashes orange and jolts less). `GAME_CONFIG.fx`. This is on top of the anxiety shake, which is always on at high anxiety.
+- **Chip pop:** words pop (grow then settle) when they land in the reply bar.
+- **Send whoosh:** when the message sends, a bright band sweeps across the reply bar with a whoosh before the result screen (`CONFIG.send`).
+- **Screen transitions:** every screen change slides the new screen in from the right while the old one slides out (`CONFIG.transition`). It's a game about slides.
+- **Sound effects** are synthesized in code (`audio.js`), so the game has sound with no files: `click`, `tick` (story typewriter), `type` (typing dots), `pop`, `collect` (pitch climbs as the sentence builds), `wrong`, `hit`, `warn` (death phrase telegraph), `whoosh`, `win`, `fail`, `boom` (death phrase slam), `thud` / `boing` / `swish` (story shake / bounce / slideIn). To use a real recording, put the file in `assets/sfx/` and map the effect name to it in `data/sfx.json`, e.g. `{ "hit": "hit.wav" }`; effects without an entry keep the synthesized sound. Browsers only allow audio after a key press or click, so sound starts after the first input. **M** toggles mute (remembered).
+
 ## Tech stack
 
 - **Plain HTML + CSS + JavaScript**, using **Canvas 2D** for the bullet hell play area. No build step, no framework. HTML/CSS is fine for menus, chat UI and story speech bubbles.
@@ -116,10 +125,11 @@ src/
   satisfaction.js # crush satisfaction meter (health) + crush face
   deathphrase.js # death phrase matching, telegraph check, level validation
   assets.js      # asset loading with placeholder fallback
-  audio.js       # sound effects
+  audio.js       # sound effects (synthesized with WebAudio, optional real files)
 data/
   levels.json    # ALL level content lives here
   story.json     # ALL story/dialogue content lives here
+  sfx.json       # optional: swap a synthesized sound for a real file in assets/sfx/
 assets/
   art/           # PNGs made by the artist (human)
   sfx/           # sound effects

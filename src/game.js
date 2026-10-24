@@ -22,6 +22,18 @@ const GAME_CONFIG = {
     respawnDelay: 0.6,  // seconds before a missing good word comes back
   },
   hitInvulnTime: 1.0, // seconds of invulnerability (blinking) after a mistake
+  // Level intro: the crush's "typing..." bubble, then her message pops in, then the bullets start.
+  intro: {
+    typingTime: 1.1,  // seconds of typing dots
+    popTime: 0.25,    // the message pops in over this long
+    readTime: 0.45,   // pause after the message appears, before the bullet phase starts
+  },
+  // Juice when you make a mistake.
+  fx: {
+    flashTime: 0.35,  // red screen flash fade-out
+    kick: 7,          // px of screen shake right after a hit (fades out over kickTime)
+    kickTime: 0.3,
+  },
 };
 
 const Game = {
@@ -44,6 +56,11 @@ const Game = {
   patternNames: [],
   patternState: {},
   patternIndex: -1, // which of the level's patterns is active (they take turns)
+  introT: 0,        // seconds since the level opened (typing dots, then message, then play)
+  introCue: 0,      // how many intro sounds have played
+  flash: 0,         // 0..1 screen flash after a mistake
+  flashColor: '255,50,70',
+  kick: 0,          // 0..1 screen-shake impulse after a mistake
 
   start(level) {
     this.level = level;
@@ -67,6 +84,61 @@ const Game = {
     this.patternNames = this.level.patterns;
     this.patternState = {};
     this.patternIndex = -1;
+    this.introT = 0;
+    this.introCue = 0;
+    this.flash = 0;
+    this.kick = 0;
+  },
+
+  // ----- Level intro (typing indicator) -----
+
+  introTotal() {
+    return GAME_CONFIG.intro.typingTime + GAME_CONFIG.intro.readTime;
+  },
+
+  introDone() {
+    return this.introT >= this.introTotal();
+  },
+
+  // What the crush's bubble shows: typing dots, then the message popping in (pop goes 0..1).
+  introPhase() {
+    const c = GAME_CONFIG.intro;
+    if (this.introT < c.typingTime) return { typing: true, pop: 0 };
+    return { typing: false, pop: Math.min(1, (this.introT - c.typingTime) / c.popTime) };
+  },
+
+  // Space/click while she is "typing" jumps straight to the bullet phase.
+  skipIntro() {
+    if (this.introDone()) return;
+    if (this.introT < GAME_CONFIG.intro.typingTime) Sfx.play('pop');
+    this.introT = this.introTotal();
+    this.introCue = 99;
+  },
+
+  // The sounds that go with the intro: three typing blips, then a pop when the message lands.
+  introUpdate(dt) {
+    const c = GAME_CONFIG.intro;
+    this.introT += dt;
+    const cues = [c.typingTime * 0.15, c.typingTime * 0.45, c.typingTime * 0.75];
+    while (this.introCue < cues.length && this.introT >= cues[this.introCue]) { Sfx.play('type', { rate: 1 + this.introCue * 0.12 }); this.introCue++; }
+    if (this.introCue === cues.length && this.introT >= c.typingTime) { Sfx.play('pop'); this.introCue++; }
+  },
+
+  // Fades the hit flash and shake impulse. Runs even after the level ends (during the send whoosh).
+  updateFx(dt) {
+    this.flash = Math.max(0, this.flash - dt / GAME_CONFIG.fx.flashTime);
+    this.kick = Math.max(0, this.kick - dt / GAME_CONFIG.fx.kickTime);
+  },
+
+  kickOffset() {
+    const a = this.kick * GAME_CONFIG.fx.kick;
+    return [(Math.random() - 0.5) * 2 * a, (Math.random() - 0.5) * 2 * a];
+  },
+
+  drawFlash() {
+    if (this.flash <= 0) return;
+    ctx.fillStyle = `rgba(${this.flashColor},${0.35 * this.flash})`;
+    ctx.fillRect(0, 0, CONFIG.width, CONFIG.height);
   },
 
   // ----- Result (read by main.js when the level ends) -----
@@ -117,6 +189,7 @@ const Game = {
 
   update(dt) {
     if (this.finished()) return;
+    if (!this.introDone()) { this.introUpdate(dt); return; } // she's "typing": nothing moves yet
     this.time += dt;
     this.timeLeft -= dt;
     if (this.timeLeft <= 0) {
@@ -214,13 +287,15 @@ const Game = {
   // Every word that lands in the reply bar goes through here: checks for a death phrase
   // (instant fail) and updates the one-word-away telegraph.
   addEntry(text, kind) {
-    this.entries.push({ text, kind });
+    this.entries.push({ text, kind, born: performance.now() });
     const death = DeathPhrase.match(this.level, this.entries);
     if (death) {
       this.death = death;
       this.endReason = 'death'; // beats anything else that ends the level on this same word
     } else {
-      this.deathWarning = DeathPhrase.oneAway(this.level, this.entries);
+      const warning = DeathPhrase.oneAway(this.level, this.entries);
+      if (warning && !this.deathWarning) Sfx.play('warn'); // telegraph just started
+      this.deathWarning = warning;
     }
   },
 
@@ -235,6 +310,8 @@ const Game = {
     Anxiety.add(ANXIETY_CONFIG.hitRise);
     Satisfaction.lose(SATISFACTION_CONFIG.badHitLoss);
     this.player.invuln = GAME_CONFIG.hitInvulnTime;
+    this.flash = 1; this.flashColor = '255,50,70'; this.kick = 1;
+    Sfx.play('hit');
     this.addEntry(b.text, 'bad');
     this.checkSatisfaction();
   },
@@ -327,6 +404,8 @@ const Game = {
         Satisfaction.lose(SATISFACTION_CONFIG.misplacedLoss);
         p.invuln = GAME_CONFIG.hitInvulnTime;
         this.goods.splice(i, 1);
+        this.flash = 0.6; this.flashColor = '255,150,40'; this.kick = 0.5;
+        Sfx.play('wrong');
         this.addEntry(g.text, 'misplaced');
         this.checkSatisfaction();
       }
@@ -335,6 +414,7 @@ const Game = {
 
   collectGood(g) {
     Anxiety.add(-ANXIETY_CONFIG.correctDrop);
+    Sfx.play('collect', { rate: 1 + 0.07 * this.entries.length }); // climbs as the sentence builds
     this.addEntry(g.text, 'good');
     if (this.locked === null) {
       this.locked = g.answer; // first word picks which sentence we're building

@@ -4,6 +4,8 @@ const CONFIG = {
   width: 450,  // logical resolution (phone portrait)
   height: 800,
   replyDelay: 1.0, // seconds before the crush's reply appears on the result screen
+  send: { time: 0.55 },        // the send whoosh over the reply bar before the result screen
+  transition: { time: 0.35 },  // screens slide in from the right (it's a game about slides)
   // Death phrase fail screen timeline (seconds since the result screen opened).
   death: {
     readsAsAt: 1.2,  // "which reads as..." fades in (after showing the sent message)
@@ -59,6 +61,8 @@ const input = {
 window.addEventListener('keydown', (e) => {
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (e.repeat) return;
+  Sfx.unlock(); // browsers only start audio from a key press / click
+  if (e.code === 'KeyM') Sfx.toggleMute();
   input.keys.add(e.code);
   const state = current; // onKey may switch state; don't let the same keypress hit the new one
   if (state && state.onKey) state.onKey(e.code);
@@ -67,6 +71,7 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('keyup', (e) => input.keys.delete(e.code));
 window.addEventListener('blur', () => input.keys.clear());
 canvas.addEventListener('mousedown', (e) => {
+  Sfx.unlock();
   if (!current) return;
   if (current.onClick) {
     // Logical (450x800) coordinates, regardless of how the page is scaled.
@@ -168,8 +173,10 @@ const states = {
       drawFullscreen('screen_title.png');
       drawCenteredText('SLIDE INTO DMs', 300, 40);
       drawCenteredText('press Space / click to start', 520, 18, '#ffd');
+      drawCenteredText(Sfx.muted ? 'M: unmute sound' : 'M: mute sound', 720, 12, '#ccc');
     },
     onConfirm() {
+      Sfx.play('click');
       goTo('scene:intro', `level:${levelData.levels[0].id}`);
     },
   },
@@ -177,10 +184,22 @@ const states = {
   level: {
     enter() {
       Game.start(levelData.levels[progress.levelIndex]);
+      this.sendT = null; // set while the send whoosh plays
     },
     update(dt) {
+      if (this.sendT !== null) { // message is on its way: whoosh, then the result screen
+        this.sendT += dt;
+        Game.updateFx(dt);
+        if (this.sendT >= CONFIG.send.time) setState('result');
+        return;
+      }
       Game.update(dt);
+      Game.updateFx(dt);
       if (Game.finished()) this.send();
+    },
+    // Space/click while she is "typing" skips straight to the bullets.
+    onConfirm() {
+      Game.skipIntro();
     },
     // Locks in the bar as the sent message and picks the crush's reaction from Game.endReason.
     // Passing = sentence completed with satisfaction left (even with mistakes in the message).
@@ -203,19 +222,23 @@ const states = {
         tone: success ? answer.tone : null,
         death: outcome === 'death' ? { phrase: Game.death.phrase } : null,
       };
-      setState('result');
+      Sfx.play('whoosh');
+      this.sendT = 0;
     },
     draw() {
       drawFullscreen('bg_phone.png');
       // Anxiety shakes everything on the phone except the backdrop and the vignette.
       ctx.save();
       const [sx, sy] = Anxiety.shakeOffset();
-      ctx.translate(sx, sy);
-      Chat.draw(Game.level.crushMessage, Game.entries);
+      const [kx, ky] = Game.kickOffset(); // extra jolt right after a hit
+      ctx.translate(sx + kx, sy + ky);
+      const sendP = this.sendT === null ? undefined : Math.min(1, this.sendT / CONFIG.send.time);
+      Chat.draw(Game.level.crushMessage, Game.entries, sendP);
       Game.draw();
       ctx.restore();
       Anxiety.drawVignette();
-      drawCenteredText(`level ${progress.levelIndex + 1}/${levelData.levels.length}   move: WASD/arrows, slow: Shift`, 772, 12, '#eee');
+      Game.drawFlash();
+      drawCenteredText(`level ${progress.levelIndex + 1}/${levelData.levels.length}   move: WASD/arrows, slow: Shift   M: ${Sfx.muted ? 'unmute' : 'mute'}`, 772, 12, '#eee');
     },
   },
 
@@ -224,9 +247,26 @@ const states = {
   result: {
     enter() {
       this.t = 0;
+      this.cues = {}; // which sounds have played (flags, so skipping ahead still plays the important ones)
     },
     update(dt) {
       this.t += dt;
+      this.playCues();
+    },
+    // Typing blips while she types, then her reply pops in with a win/fail sting. Death phrase: boom on the slam.
+    playCues() {
+      const r = progress.lastResult, c = this.cues, t = this.t;
+      const once = (key, when, fn) => { if (!c[key] && t >= when) { c[key] = true; fn(); } };
+      const typeFrom = this.typingFrom();
+      once('t1', typeFrom + 0.1, () => Sfx.play('type'));
+      once('t2', typeFrom + 0.4, () => Sfx.play('type', { rate: 1.12 }));
+      once('t3', typeFrom + 0.7, () => Sfx.play('type', { rate: 1.24 }));
+      if (r.death) once('boom', CONFIG.death.phraseAt, () => Sfx.play('boom'));
+      once('reply', this.replyAt(), () => { Sfx.play('pop'); Sfx.play(r.success ? 'win' : 'fail'); });
+    },
+    // She starts "typing" right away, or for the last second before a death-phrase reply.
+    typingFrom() {
+      return progress.lastResult.death ? CONFIG.death.replyAt - 1.0 : 0;
     },
     replyAt() {
       return progress.lastResult.death ? CONFIG.death.replyAt : CONFIG.replyDelay;
@@ -277,18 +317,24 @@ const states = {
       Chat.drawReplyBar(r.entries, '(you sent nothing...)', 0, r.death ? 0.35 : 0);
       Chat.drawPlayerAvatar(r.success ? 'happy' : 'panic');
       if (r.death) this.drawReveal(r);
-      if (!this.replyShown()) return;
+      const replyDy = r.death ? 425 : 270;
+      if (!this.replyShown()) {
+        if (this.t >= this.typingFrom()) Chat.drawCrushMessage('', 'neutral', replyDy, 0, { typing: true });
+        return;
+      }
 
       // Pass with a clean message: amused. Pass with mistakes: neutral. Fail: unimpressed.
       const face = r.success ? (r.clean ? 'amused' : 'neutral') : 'unimpressed';
-      Chat.drawCrushMessage(r.reply, face, r.death ? 425 : 270);
+      Chat.drawCrushMessage(r.reply, face, replyDy, 0, { pop: Math.min(1, (this.t - this.replyAt()) / 0.25) });
       const note = OUTCOME_NOTES[r.outcome] && OUTCOME_NOTES[r.outcome](r);
       if (note) drawCenteredText(note, 570, 14, '#ddd');
       drawCenteredText('press Space / click', 600, 16, '#ffd');
     },
     onConfirm() {
+      Sfx.play('click');
       if (!this.replyShown()) {
         this.t = this.replyAt(); // first press just skips the wait
+        this.playCues();
         return;
       }
       afterLevel(progress.lastResult.success);
@@ -307,6 +353,7 @@ const states = {
       if (!this.won) drawCenteredText('Esc: back to title', 560, 14, '#ccc');
     },
     onConfirm() {
+      Sfx.play('click');
       if (this.won) setState('title');
       else setState('level'); // retry the level that was failed
     },
@@ -321,7 +368,20 @@ states.story = Story; // story.js is the 'story' state
 let current = null;
 let currentName = '';
 
+// Screen transition: the old screen is snapshotted and slides out to the left while the new one
+// slides in from the right. `trans` is null when no transition is running.
+const snap = document.createElement('canvas');
+snap.width = CONFIG.width;
+snap.height = CONFIG.height;
+const snapCtx = snap.getContext('2d');
+let trans = null;
+
 function setState(name) {
+  if (current) { // everything but the very first screen slides in
+    snapCtx.clearRect(0, 0, CONFIG.width, CONFIG.height);
+    snapCtx.drawImage(canvas, 0, 0);
+    trans = { t: 0 };
+  }
   if (current && current.exit) current.exit();
   currentName = name;
   current = states[name];
@@ -336,7 +396,19 @@ function frame(time) {
 
   if (current.update) current.update(dt);
   ctx.clearRect(0, 0, CONFIG.width, CONFIG.height);
-  current.draw();
+  if (trans) {
+    trans.t += dt;
+    const k = Math.min(1, trans.t / CONFIG.transition.time);
+    const e = 1 - Math.pow(1 - k, 3); // ease out
+    ctx.drawImage(snap, -e * CONFIG.width, 0);
+    ctx.save();
+    ctx.translate((1 - e) * CONFIG.width, 0);
+    current.draw();
+    ctx.restore();
+    if (k >= 1) trans = null;
+  } else {
+    current.draw();
+  }
 
   requestAnimationFrame(frame);
 }
@@ -360,7 +432,9 @@ Promise.all([
   }),
   fetchOptionalJSON('data/story.json'),
   fetchOptionalJSON('data/sprites.json'),
-]).then(([, data, story, sprites]) => {
+  fetchOptionalJSON('data/sfx.json'),
+]).then(([, data, story, sprites, sfx]) => {
+  Sfx.setManifest(sfx);
   levelData.levels = data.levels;
   DeathPhrase.validate(levelData.levels); // console.warns any unfair or unreachable death phrase
   for (const l of levelData.levels) {

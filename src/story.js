@@ -103,6 +103,18 @@ const Story = {
     this.time += dt;
     this.typeT += dt;
     this.effectT += dt;
+    this.typeTicks();
+  },
+
+  // A quiet typewriter tick for every other letter that appears (none for spaces or when skipping).
+  typeTicks() {
+    const text = this.line.text;
+    if (!isFinite(this.typeT)) { this.ticked = text.length; return; }
+    const upTo = Math.min(text.length, Math.floor(this.typeT * STORY_CONFIG.typeSpeed));
+    let tick = false;
+    for (let i = this.ticked; i < upTo; i++) if (text[i] !== ' ' && i % 2 === 0) tick = true;
+    this.ticked = Math.max(this.ticked, upTo);
+    if (tick) Sfx.play('tick');
   },
 
   nextLine() {
@@ -111,8 +123,11 @@ const Story = {
     const line = this.scene.lines[this.lineIdx];
     this.line = line;
     this.typeT = 0;
+    this.ticked = 0;
     this.effectT = 0;
     this.effect = line.effect || null;
+    const cue = { shake: 'thud', bounce: 'boing', slideIn: 'swish' }[this.effect];
+    if (cue) Sfx.play(cue);
 
     if (line.sprite) {
       const pos = line.position || 'left';
@@ -136,6 +151,7 @@ const Story = {
 
   // First press finishes the line instantly; the next one advances.
   onConfirm() {
+    Sfx.play('click');
     if (!this.typingDone()) this.typeT = Infinity;
     else this.nextLine();
   },

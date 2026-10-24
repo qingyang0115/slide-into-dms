@@ -36,6 +36,15 @@ const Chat = {
   // A word chip centered on (cx, cy). `kind` picks art + placeholder color:
   // 'good' | 'bad' | 'misplaced'. opts.glow (0..1) draws a pulsing outline.
   chip(kind, text, cx, cy, w, h, opts = {}) {
+    if (opts.scale && opts.scale !== 1) { // pop animation: redraw scaled around the chip's centre
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(opts.scale, opts.scale);
+      ctx.translate(-cx, -cy);
+      this.chip(kind, text, cx, cy, w, h, { ...opts, scale: 1 });
+      ctx.restore();
+      return;
+    }
     const x = cx - w / 2, y = cy - h / 2;
     const art = kind === 'good' ? 'chip_good.png' : 'chip_bad.png';
     if (Assets.has(art)) {
@@ -86,11 +95,22 @@ const Chat = {
   },
 
   // face: 'neutral' | 'amused' | 'unimpressed' picks the avatar. dy shifts the whole row down.
-  drawCrushMessage(text, face = 'neutral', dy = 0, wobble = 0) {
+  // opts.typing draws the "typing..." dots instead of the text; opts.pop (0..1) pops the bubble in.
+  drawCrushMessage(text, face = 'neutral', dy = 0, wobble = 0, opts = {}) {
     const av = CHAT_CONFIG.crushAvatar;
     Assets.draw(ctx, `char_crush_${face}.png`, av.x, av.y + dy, av.size, av.size, 'circle');
 
     const b = { ...CHAT_CONFIG.crushBubble, y: CHAT_CONFIG.crushBubble.y + dy };
+    if (opts.typing) return this.drawTyping(b);
+    ctx.save();
+    if (opts.pop !== undefined && opts.pop < 1) {
+      const k = 1 - Math.pow(1 - opts.pop, 3);
+      const s = 0.75 + 0.25 * k;
+      ctx.globalAlpha = k;
+      ctx.translate(b.x, b.y + b.h / 2);
+      ctx.scale(s, s);
+      ctx.translate(-b.x, -(b.y + b.h / 2));
+    }
     this.bubble('bubble_crush.png', CHAT_CONFIG.colors.bubbleCrush, b);
     ctx.fillStyle = '#222';
     ctx.font = b.font;
@@ -102,6 +122,21 @@ const Chat = {
       const [wx, wy] = this.wobbleOffset(wobble, i * 40);
       ctx.fillText(l, b.x + b.pad + wx, top + i * b.lineHeight + wy);
     });
+    ctx.restore();
+  },
+
+  // A small bubble with three bouncing dots, in the crush bubble's position.
+  drawTyping(b) {
+    const small = { x: b.x, y: b.y + (b.h - 44) / 2, w: 74, h: 44 };
+    this.bubble('bubble_crush.png', CHAT_CONFIG.colors.bubbleCrush, small);
+    const t = performance.now() / 1000;
+    ctx.fillStyle = '#888';
+    for (let i = 0; i < 3; i++) {
+      const bounce = Math.max(0, Math.sin(t * 8 - i * 0.9)) * 5;
+      ctx.beginPath();
+      ctx.arc(small.x + 22 + i * 15, small.y + small.h / 2 - bounce, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
   },
 
   // entries: [{ text, kind: 'good' | 'bad' | 'misplaced' }]
@@ -158,19 +193,43 @@ const Chat = {
       let x = r.x + r.pad;
       const cy = r.y + r.pad + h / 2 + ri * (h + gap);
       for (const { e, w } of row) {
-        this.chip(e.kind, e.text, x + w / 2, cy, w, h, { wobble });
+        const age = e.born ? performance.now() - e.born : 1e9;
+        const scale = age < 200 ? 1 + 0.4 * (1 - age / 200) : 1; // pop when it lands
+        this.chip(e.kind, e.text, x + w / 2, cy, w, h, { wobble, scale });
         x += w + gap;
       }
     });
   },
 
+  // Send whoosh: a bright band sweeps across the reply bubble while it flashes.
+  drawSendSweep(p) {
+    const r = CHAT_CONFIG.replyBubble;
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(r.x, r.y, r.w, r.h, 18);
+    ctx.clip();
+    ctx.fillStyle = `rgba(255,255,255,${0.35 * (1 - p)})`;
+    ctx.fillRect(r.x, r.y, r.w, r.h);
+    const x = r.x - 120 + p * (r.w + 240);
+    const g = ctx.createLinearGradient(x - 60, 0, x + 60, 0);
+    g.addColorStop(0, 'rgba(255,255,255,0)');
+    g.addColorStop(0.5, 'rgba(255,255,255,0.85)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x - 60, r.y, 120, r.h);
+    ctx.restore();
+  },
+
   // Live chat view during the bullet phase. Wobble and the protagonist's face follow anxiety;
   // the crush's face follows satisfaction (or turns suspicious on a death phrase warning).
-  draw(crushMessage, entries) {
+  // sendP (0..1) is the progress of the send whoosh once the message is on its way.
+  draw(crushMessage, entries, sendP) {
     const wobble = Anxiety.wobbleAmp();
     const flash = Game.deathWarning ? 0.3 + 0.2 * Math.sin(performance.now() / 80) : 0;
-    this.drawCrushMessage(crushMessage, Game.crushFace(), 0, wobble);
+    const intro = Game.introPhase();
+    this.drawCrushMessage(crushMessage, Game.crushFace(), 0, wobble, intro);
     this.drawReplyBar(entries, 'your reply...', wobble, flash);
+    if (sendP !== undefined && sendP !== null) this.drawSendSweep(sendP);
     this.drawPlayerAvatar(Anxiety.face());
     Anxiety.drawMeter();
     Satisfaction.drawMeter();
