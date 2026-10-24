@@ -1,0 +1,62 @@
+{
+  "speakers": {
+    "player": "You",
+    "friend": "Jo",
+    "crush": "Sam"
+  },
+  "scenes": {
+    "intro": {
+      "background": "bg_bedroom.png",
+      "lines": [
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "ok. ok. she posted a story. i'm gonna reply." },
+        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "BRO just slide in. what's the worst that could happen", "effect": "shake" },
+        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "literally everything" },
+        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "nobody has ever died from a DM. probably.", "effect": "bounce" },
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "i could be the first. from the cringe." },
+        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "type fast. don't think. i believe in you." },
+        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "wait. i got a message. Sam is TYPING.", "effect": "shake" }
+      ],
+      "next": "level:party"
+    },
+
+    "after_party": {
+      "background": "bg_bedroom.png",
+      "lines": [
+        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "WAIT. you're going to the party?? look at you go!", "effect": "bounce" },
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "i sweated through the entire conversation." }
+      ],
+      "next": "level:study"
+    },
+
+    "after_study": {
+      "background": "bg_classroom.png",
+      "lines": [
+        { "speaker": "crush", "sprite": "story_crush_amused_sheet.png", "position": "right", "text": "so are you always this nervous over text?", "effect": "slideIn" },
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "...only when it matters." }
+      ],
+      "next": "level:who"
+    },
+
+    "fail": {
+      "background": "bg_bedroom.png",
+      "lines": [
+        { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "ok. that was... a lot." },
+        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "i'm never texting again. ever.", "effect": "shake" },
+        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "again. now. go.", "effect": "bounce" }
+      ],
+      "next": "retry"
+    },
+
+    "ending": {
+      "background": "bg_classroom.png",
+      "lines": [
+        { "speaker": "crush", "sprite": "story_crush_neutral_sheet.png", "position": "right", "text": "ok so it was you the whole time. cool." },
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "is that a good cool or a bad cool" },
+        { "speaker": "crush", "sprite": "story_crush_amused_sheet.png", "position": "right", "text": "i'm still deciding. text me." },
+        { "speaker": "player", "sprite": "story_player_happy_sheet.png", "position": "left", "text": "...i can do that.", "effect": "bounce" },
+        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "center", "text": "I TOLD YOU. SLIDE.", "effect": "slideIn" }
+      ],
+      "next": "end"
+    }
+  }
+}

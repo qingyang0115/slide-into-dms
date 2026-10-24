@@ -16,6 +16,7 @@ const CONFIG = {
 // Every image the game may use. Missing ones become labeled placeholders.
 const PRELOAD = [
   'bg_phone.png',
+  'bubble_speech.png',
   'player_heart.png',
   'chip_bad.png',
   'chip_good.png',
@@ -65,8 +66,15 @@ window.addEventListener('keydown', (e) => {
 });
 window.addEventListener('keyup', (e) => input.keys.delete(e.code));
 window.addEventListener('blur', () => input.keys.clear());
-canvas.addEventListener('mousedown', () => {
-  if (current && current.onConfirm) current.onConfirm();
+canvas.addEventListener('mousedown', (e) => {
+  if (!current) return;
+  if (current.onClick) {
+    // Logical (450x800) coordinates, regardless of how the page is scaled.
+    const r = canvas.getBoundingClientRect();
+    current.onClick((e.clientX - r.left) * CONFIG.width / r.width, (e.clientY - r.top) * CONFIG.height / r.height);
+  } else if (current.onConfirm) {
+    current.onConfirm();
+  }
 });
 
 // ---------- Shared game progress ----------
@@ -74,11 +82,13 @@ const levelData = { levels: [] }; // filled from data/levels.json at boot
 
 const progress = {
   levelIndex: 0,
-  lastResult: null, // { success, entries, reply, tone }
+  lastResult: null, // { success, outcome, entries, reply, tone }
+  won: false,       // true when the run ends on the win screen
   tones: { chill: 0, flirty: 0, unhinged: 0 }, // counts of completed answers (drives the ending, step 7)
   reset() {
     this.levelIndex = 0;
     this.lastResult = null;
+    this.won = false;
     this.tones = { chill: 0, flirty: 0, unhinged: 0 };
   },
 };
@@ -96,6 +106,45 @@ function drawCenteredText(text, y, size = 24, color = '#fff') {
 
 function drawFullscreen(name) {
   Assets.draw(ctx, name, 0, 0, CONFIG.width, CONFIG.height);
+}
+
+// ---------- Flow ----------
+// Where to go next. Targets (same format as story.json "next" and levels.json afterWin/afterFail):
+//   level:<id>   scene:<id>   retry (replay the level just played)   end (win screen)   title
+// If a scene doesn't exist (story.json missing or typo) we go to `fallback` so the game never dead-ends.
+function goTo(target, fallback) {
+  const [kind, id] = target.split(':');
+  if (kind === 'level') {
+    const i = levelData.levels.findIndex((l) => l.id === id);
+    if (i < 0) { console.warn(`goTo: unknown level "${id}"`); return goTo(fallback || 'end'); }
+    progress.levelIndex = i;
+    return setState('level');
+  }
+  if (kind === 'scene') {
+    if (!Story.has(id)) {
+      if (!fallback) console.warn(`goTo: unknown scene "${id}"`);
+      return goTo(fallback || 'end');
+    }
+    return Story.start(id);
+  }
+  if (target === 'retry') return setState('level');
+  if (target === 'title') return setState('title');
+  if (target === 'gameover') { progress.won = false; return setState('gameover'); }
+  progress.won = true; // 'end'
+  setState('gameover');
+}
+
+// After a level: its afterWin / afterFail scene, else the next level (win) or the game over screen (fail).
+function afterLevel(success) {
+  const levels = levelData.levels;
+  const level = levels[progress.levelIndex];
+  if (success) {
+    const next = levels[progress.levelIndex + 1];
+    const fallback = next ? `level:${next.id}` : 'end';
+    goTo(level.afterWin || fallback, fallback);
+  } else {
+    goTo(level.afterFail || 'gameover', 'gameover');
+  }
 }
 
 // Small caption under the crush's reply explaining how the level ended.
@@ -117,7 +166,7 @@ const states = {
       drawCenteredText('press Space / click to start', 520, 18, '#ffd');
     },
     onConfirm() {
-      setState('level');
+      goTo('scene:intro', `level:${levelData.levels[0].id}`);
     },
   },
 
@@ -238,17 +287,14 @@ const states = {
         this.t = this.replyAt(); // first press just skips the wait
         return;
       }
-      if (!progress.lastResult.success) return setState('gameover');
-      progress.levelIndex++;
-      if (progress.levelIndex >= levelData.levels.length) return setState('gameover');
-      setState('level');
+      afterLevel(progress.lastResult.success);
     },
   },
 
-  // Doubles as the win screen until the ending scene exists (build steps 7/9).
+  // Doubles as the win screen ("end" target) until the real ending screen exists (build steps 7/9).
   gameover: {
     enter() {
-      this.won = progress.lastResult && progress.lastResult.success;
+      this.won = progress.won;
     },
     draw() {
       drawFullscreen(this.won ? 'screen_ending.png' : 'screen_gameover.png');
@@ -265,6 +311,8 @@ const states = {
     },
   },
 };
+
+states.story = Story; // story.js is the 'story' state
 
 let current = null;
 let currentName = '';
@@ -297,15 +345,26 @@ function showBootError(msg) {
   Chat.wrapLines(msg, 380, '15px system-ui, sans-serif').forEach((l, i) => drawCenteredText(l, 350 + i * 22, 15, '#ddd'));
 }
 
+// Optional data files: the game stays playable without them (no story / no sprite sheets).
+const fetchOptionalJSON = (url) => fetch(url).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+
 Promise.all([
   Assets.loadAll(PRELOAD),
   fetch('data/levels.json').then((r) => {
     if (!r.ok) throw new Error(`levels.json: HTTP ${r.status}`);
     return r.json();
   }),
-]).then(([, data]) => {
+  fetchOptionalJSON('data/story.json'),
+  fetchOptionalJSON('data/sprites.json'),
+]).then(([, data, story, sprites]) => {
   levelData.levels = data.levels;
   DeathPhrase.validate(levelData.levels); // console.warns any unfair or unreachable death phrase
+  Sprites.setDefs(sprites);
+  if (story) Story.setData(story);
+  else console.warn('data/story.json missing or invalid: story scenes are skipped');
+  Story.validate(levelData.levels); // console.warns broken scene links
+  return Assets.loadAll(Story.assetNames()); // backgrounds + story sprites (missing ones become placeholders)
+}).then(() => {
   setState('title');
   requestAnimationFrame(frame);
 }).catch((err) => {

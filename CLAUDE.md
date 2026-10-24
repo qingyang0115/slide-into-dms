@@ -129,6 +129,8 @@ assets/
 
 If an asset is added that isn't in this table, add it to the table.
 
+Story sprite sheets the current `story.json` uses (each needs an entry in `data/sprites.json`): `story_player_nervous_sheet.png`, `story_player_panic_sheet.png`, `story_player_happy_sheet.png`, `story_friend_hype_sheet.png`, `story_friend_unsure_sheet.png`, `story_crush_neutral_sheet.png`, `story_crush_amused_sheet.png`.
+
 ## Level data format (`data/levels.json`)
 
 All content is data. Adding a level must never require code changes.
@@ -182,7 +184,9 @@ All dialogue is data. Rewriting the story must never require code changes.
 }
 ```
 
-- `next` is either `level:<id>` or `scene:<id>`. Levels can point to a scene after success/fail via `"afterWin"` / `"afterFail"` fields in `levels.json`.
+- `next` (and a level's `afterWin` / `afterFail`) is a target: `level:<id>`, `scene:<id>`, `retry` (replay the level that was just played), `end` (win screen) or `title`. If `afterWin` / `afterFail` is missing, a won level goes to the next level (or `end` after the last) and a failed level goes to the game over screen. A target scene that doesn't exist is skipped, so the game never dead-ends.
+- `speakers` (top-level, optional) maps a line's `speaker` id to the name shown on the name tag, e.g. `{ "player": "You", "friend": "Jo", "crush": "Sam" }`. Lines with no `sprite` are narration (no highlighted character). `position` is `left`, `center` or `right`; a character stays on screen until another sprite takes their position.
+- On load the game warns in the console about unknown targets, bad positions/effects and empty scenes. `data/story.json` is optional: without it, scenes are skipped.
 - `effect` (optional): `shake`, `bounce`, `slideIn`, `fadeIn`.
 - Typewriter text; click/Space finishes the line instantly, a second press advances. Add a small "skip scene" button.
 - Keep the whole story short: **intro (~6–10 lines), 1–3 lines between levels, ending (~5 lines)**. The bullet hell is the main game.
