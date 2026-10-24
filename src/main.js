@@ -363,6 +363,9 @@ Promise.all([
 ]).then(([, data, story, sprites]) => {
   levelData.levels = data.levels;
   DeathPhrase.validate(levelData.levels); // console.warns any unfair or unreachable death phrase
+  for (const l of levelData.levels) {
+    for (const name of l.patterns) if (!Patterns[name]) console.warn(`level "${l.id}": unknown pattern "${name}"`);
+  }
   Sprites.setDefs(sprites);
   if (story) Story.setData(story);
   else console.warn('data/story.json missing or invalid: story scenes are skipped');

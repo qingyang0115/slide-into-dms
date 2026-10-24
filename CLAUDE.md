@@ -222,6 +222,7 @@ All dialogue is data. Rewriting the story must never require code changes.
     { "scene": "ending_neutral" }
   ]
 }
+```
 
 - `next` (and a level's `afterWin` / `afterFail`) is a target: `level:<id>`, `scene:<id>`, `retry` (replay the level that was just played), `ending` (pick an ending scene from the tone counts, see `endings` below), `end` (win screen) or `title`. If `afterWin` / `afterFail` is missing, a won level goes to the next level (or `end` after the last) and a failed level goes to the game over screen. A target scene that doesn't exist is skipped, so the game never dead-ends.
 - `speakers` (top-level, optional) maps a line's `speaker` id to the name shown on the name tag, e.g. `{ "player": "You", "friend": "Jo", "crush": "Sam" }`. Lines with no `sprite` are narration (no highlighted character). `position` is `left`, `center` or `right`; a character stays on screen until another sprite takes their position.
@@ -235,9 +236,11 @@ All dialogue is data. Rewriting the story must never require code changes.
 ## Bullet patterns (keep to 3–4)
 
 1. `rain` — bad words fall from the top at random x.
-2. `aimed` — bad words shot from the edges toward the player's position.
-3. `spiral` — bad words spin out from the crush's avatar.
-4. `wall` — a horizontal line of words with one gap.
+2. `aimed` — bad words are shot from the left, right and top edges toward where the player was when the shot spawned (never from the bottom).
+3. `spiral` — bad words spray out in a sweeping fan from the top-left corner of the play area (right under the crush's avatar).
+4. `wall` — a horizontal line of bad words falls with one gap (at least ~120px wide) to slip through. Wall chips use full-size hitboxes and sit side by side so the wall is solid and every word stays readable.
+
+A level's `patterns` list **takes turns**: one pattern is active at a time and the next one takes over every `PATTERN_CONFIG.cycleTime` seconds (default 6), wrapping around. Bullets already in flight keep going when the pattern changes. Speeds are base values; the level's `bulletSpeed` and the anxiety multiplier scale them. All pattern numbers live in `PATTERN_CONFIG` (`patterns.js`). On load the game warns about pattern names that don't exist.
 
 Make one pattern feel good before adding the next.
 

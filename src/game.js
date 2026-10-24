@@ -43,6 +43,7 @@ const Game = {
   badWords: [],
   patternNames: [],
   patternState: {},
+  patternIndex: -1, // which of the level's patterns is active (they take turns)
 
   start(level) {
     this.level = level;
@@ -65,6 +66,7 @@ const Game = {
     this.badWords = this.level.badWords;
     this.patternNames = this.level.patterns;
     this.patternState = {};
+    this.patternIndex = -1;
   },
 
   // ----- Result (read by main.js when the level ends) -----
@@ -124,16 +126,24 @@ const Game = {
     }
     this.updatePlayer(dt);
 
-    for (const name of this.patternNames) {
-      const p = Patterns[name];
-      if (!p) continue;
-      p.update(this, dt, (this.patternState[name] = this.patternState[name] || {}));
-    }
+    this.updatePattern(dt);
 
     Anxiety.update(dt);
     this.updateBullets(dt);
     this.syncGoods(dt);
     this.updateGoods(dt);
+  },
+
+  // One pattern is active at a time; the level's list takes turns every PATTERN_CONFIG.cycleTime seconds.
+  updatePattern(dt) {
+    if (!this.patternNames.length) return;
+    const index = Math.floor(this.time / PATTERN_CONFIG.cycleTime) % this.patternNames.length;
+    if (index !== this.patternIndex) {
+      this.patternIndex = index;
+      this.patternState = {}; // fresh timers for the pattern that just took over
+    }
+    const p = Patterns[this.patternNames[index]];
+    if (p) p.update(this, dt, this.patternState);
   },
 
   updatePlayer(dt) {
@@ -167,6 +177,7 @@ const Game = {
 
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const b = this.bullets[i];
+      const scale = b.hitScale || GAME_CONFIG.chip.hitShrink; // wall chips use full-size hitboxes
       b.x += b.vx * dt * speed;
       b.y += b.vy * dt * speed;
 
@@ -179,11 +190,11 @@ const Game = {
       }
 
       if (p.invuln <= 0) {
-        if (this.circleHitsRect(p.x, p.y, GAME_CONFIG.player.hitRadius, b, GAME_CONFIG.chip.hitShrink)) {
+        if (this.circleHitsRect(p.x, p.y, GAME_CONFIG.player.hitRadius, b, scale)) {
           this.onBadHit(b);
           this.bullets.splice(i, 1);
         } else if (!b.nearMissed &&
-                   this.circleHitsRect(p.x, p.y, ANXIETY_CONFIG.nearMissRadius, b, GAME_CONFIG.chip.hitShrink)) {
+                   this.circleHitsRect(p.x, p.y, ANXIETY_CONFIG.nearMissRadius, b, scale)) {
           b.nearMissed = true; // each bad word counts once
           Anxiety.add(ANXIETY_CONFIG.nearMissRise);
         }
