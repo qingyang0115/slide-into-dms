@@ -3,8 +3,7 @@
 const CONFIG = {
   width: 450,  // logical resolution (phone portrait)
   height: 800,
-  // Placeholder level count until levels.json loading lands (build step 4).
-  placeholderLevelCount: 2,
+  replyDelay: 1.0, // seconds before the crush's reply appears on the result screen
 };
 
 // Every image the game may use. Missing ones become labeled placeholders.
@@ -56,12 +55,16 @@ canvas.addEventListener('mousedown', () => {
 });
 
 // ---------- Shared game progress ----------
+const levelData = { levels: [] }; // filled from data/levels.json at boot
+
 const progress = {
   levelIndex: 0,
-  lastResult: null, // { success: bool, message: string }
+  lastResult: null, // { success, entries, reply, tone }
+  tones: { chill: 0, flirty: 0, unhinged: 0 }, // counts of completed answers (drives the ending, step 7)
   reset() {
     this.levelIndex = 0;
     this.lastResult = null;
+    this.tones = { chill: 0, flirty: 0, unhinged: 0 };
   },
 };
 
@@ -96,27 +99,25 @@ const states = {
     },
   },
 
-  // Level data still comes from Game's fallbackLevel; levels.json loading is step 4.
   level: {
     enter() {
-      Game.start();
-      this.timeLeft = Game.level.timeLimit;
+      Game.start(levelData.levels[progress.levelIndex]);
     },
     update(dt) {
       Game.update(dt);
-      if (Game.done) return this.send();
-      this.timeLeft -= dt;
-      if (this.timeLeft <= 0) this.send(); // out of time: sends whatever is in the bar
+      if (Game.finished()) this.send();
     },
-    // Turns the bar into the sent message. Crush reply is a stub until step 4.
+    // Locks in the bar as the sent message and picks the crush's reaction.
     send() {
       const success = Game.isClean();
       const answer = Game.lockedAnswer();
       const fails = Game.level.failReplies;
+      if (success) progress.tones[answer.tone] = (progress.tones[answer.tone] || 0) + 1;
       progress.lastResult = {
         success,
-        message: Game.message(),
+        entries: Game.entries.slice(),
         reply: success ? answer.reply : fails[Math.floor(Math.random() * fails.length)],
+        tone: success ? answer.tone : null,
       };
       setState('result');
     },
@@ -124,25 +125,38 @@ const states = {
       drawFullscreen('bg_phone.png');
       Chat.draw(Game.level.crushMessage, Game.entries);
       Game.draw();
-      drawCenteredText(`level ${progress.levelIndex + 1}   time ${Math.max(0, Math.ceil(this.timeLeft))}   move: WASD/arrows, slow: Shift`, 772, 12, '#eee');
+      drawCenteredText(`level ${progress.levelIndex + 1}/${levelData.levels.length}   move: WASD/arrows, slow: Shift`, 772, 12, '#eee');
     },
   },
 
+  // Chat view: your sent message, then (after a beat) the crush's reaction.
   result: {
+    enter() {
+      this.t = 0;
+    },
+    update(dt) {
+      this.t += dt;
+    },
+    replyShown() {
+      return this.t >= CONFIG.replyDelay;
+    },
     draw() {
       const r = progress.lastResult;
       drawFullscreen('bg_phone.png');
-      drawCenteredText('you sent:', 200, 18, '#ddd');
-      const lines = Chat.wrapLines(r.message || '(nothing...)', 380, 'bold 22px system-ui, sans-serif');
-      lines.forEach((l, i) => drawCenteredText(l, 240 + i * 30, 22));
-      drawCenteredText(r.reply, 240 + lines.length * 30 + 60, 22, r.success ? '#9f9' : '#f99');
+      Chat.drawCrushMessage(Game.level.crushMessage);
+      Chat.drawReplyBar(r.entries, '(you sent nothing...)');
+      if (!this.replyShown()) return;
+      Chat.drawCrushMessage(r.reply, r.success ? 'amused' : 'unimpressed', 270);
       drawCenteredText('press Space / click', 600, 16, '#ffd');
     },
     onConfirm() {
-      const r = progress.lastResult;
-      if (!r.success) return setState('gameover');
+      if (!this.replyShown()) {
+        this.t = CONFIG.replyDelay; // first press just skips the wait
+        return;
+      }
+      if (!progress.lastResult.success) return setState('gameover');
       progress.levelIndex++;
-      if (progress.levelIndex >= CONFIG.placeholderLevelCount) return setState('gameover');
+      if (progress.levelIndex >= levelData.levels.length) return setState('gameover');
       setState('level');
     },
   },
@@ -192,7 +206,25 @@ function frame(time) {
 }
 
 // ---------- Boot ----------
-Assets.loadAll(PRELOAD).then(() => {
+function showBootError(msg) {
+  ctx.fillStyle = '#222';
+  ctx.fillRect(0, 0, CONFIG.width, CONFIG.height);
+  drawCenteredText('Could not start the game', 300, 22, '#f99');
+  Chat.wrapLines(msg, 380, '15px system-ui, sans-serif').forEach((l, i) => drawCenteredText(l, 350 + i * 22, 15, '#ddd'));
+}
+
+Promise.all([
+  Assets.loadAll(PRELOAD),
+  fetch('data/levels.json').then((r) => {
+    if (!r.ok) throw new Error(`levels.json: HTTP ${r.status}`);
+    return r.json();
+  }),
+]).then(([, data]) => {
+  levelData.levels = data.levels;
   setState('title');
   requestAnimationFrame(frame);
+}).catch((err) => {
+  console.error(err);
+  // Opening index.html as a file:// URL blocks fetch(); a local server fixes it.
+  showBootError(`${err.message}. Run a local server (python -m http.server) and open it from there.`);
 });

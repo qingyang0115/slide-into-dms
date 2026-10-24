@@ -1,0 +1,45 @@
+{
+  "levels": [
+    {
+      "id": "party",
+      "crushMessage": "hey are u going to the party?",
+      "answers": [
+        { "words": ["yeah", "i'll", "be", "there"], "tone": "chill", "reply": "cool see u there" },
+        { "words": ["only", "if", "you", "are"], "tone": "flirty", "reply": "omg 😳" }
+      ],
+      "badWords": ["u", "up?", "lol", "sorry", "k"],
+      "patterns": ["rain"],
+      "bulletSpeed": 1.0,
+      "timeLimit": 25,
+      "failReplies": ["seen 11:42pm", "???", "who is this"]
+    },
+    {
+      "id": "study",
+      "crushMessage": "wanna study for the math test together?",
+      "answers": [
+        { "words": ["sure", "sounds", "good"], "tone": "chill", "reply": "great, library at 4?" },
+        { "words": ["i'd", "study", "anything", "with", "you"], "tone": "flirty", "reply": "...ok that was smooth" },
+        { "words": ["i", "am", "the", "math"], "tone": "unhinged", "reply": "wow ok. see u at 4" }
+      ],
+      "badWords": ["u up?", "lol", "sorry", "k", "😳", "hi"],
+      "patterns": ["rain"],
+      "bulletSpeed": 1.2,
+      "timeLimit": 25,
+      "failReplies": ["did u just send that to the group chat", "typing... typing... nvm", "my phone auto-corrected u to 'weirdo'"]
+    },
+    {
+      "id": "who",
+      "crushMessage": "wait, is this the guy from math class?",
+      "answers": [
+        { "words": ["yeah", "that's", "me"], "tone": "chill", "reply": "oh nice, hi!" },
+        { "words": ["the", "cute", "one", "yes"], "tone": "flirty", "reply": "lol confident. i like it" },
+        { "words": ["i", "contain", "multitudes"], "tone": "unhinged", "reply": "...who ARE you" }
+      ],
+      "badWords": ["u up?", "lol", "sorry", "k", "😳", "hi", "uhh", "um"],
+      "patterns": ["rain"],
+      "bulletSpeed": 1.4,
+      "timeLimit": 25,
+      "failReplies": ["seen 11:42pm", "i'm gonna pretend i didn't read that", "blocked? no. but i'm thinking about it"]
+    }
+  ]
+}

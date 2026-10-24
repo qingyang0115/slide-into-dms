@@ -76,11 +76,12 @@ const Chat = {
     }
   },
 
-  drawCrushMessage(text) {
+  // face: 'neutral' | 'amused' | 'unimpressed' picks the avatar. dy shifts the whole row down.
+  drawCrushMessage(text, face = 'neutral', dy = 0) {
     const av = CHAT_CONFIG.crushAvatar;
-    Assets.draw(ctx, 'char_crush_neutral.png', av.x, av.y, av.size, av.size, 'circle');
+    Assets.draw(ctx, `char_crush_${face}.png`, av.x, av.y + dy, av.size, av.size, 'circle');
 
-    const b = CHAT_CONFIG.crushBubble;
+    const b = { ...CHAT_CONFIG.crushBubble, y: CHAT_CONFIG.crushBubble.y + dy };
     this.bubble('bubble_crush.png', CHAT_CONFIG.colors.bubbleCrush, b);
     ctx.fillStyle = '#222';
     ctx.font = b.font;
@@ -92,7 +93,7 @@ const Chat = {
   },
 
   // entries: [{ text, kind: 'good' | 'bad' | 'misplaced' }]
-  drawReplyBar(entries) {
+  drawReplyBar(entries, emptyText = 'your reply...') {
     const r = CHAT_CONFIG.replyBubble;
     this.bubble('bubble_player.png', CHAT_CONFIG.colors.bubblePlayer, r);
 
@@ -101,7 +102,7 @@ const Chat = {
       ctx.font = 'italic 15px system-ui, sans-serif';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText('your reply...', r.x + r.pad, r.y + r.pad + 13);
+      ctx.fillText(emptyText, r.x + r.pad, r.y + r.pad + 13);
       return;
     }
 

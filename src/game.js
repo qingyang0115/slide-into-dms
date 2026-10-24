@@ -22,21 +22,6 @@ const GAME_CONFIG = {
     respawnDelay: 0.6,  // seconds before a missing good word comes back
   },
   hitInvulnTime: 1.0, // seconds of invulnerability (blinking) after a mistake
-
-  // Stand-in until levels.json loading lands (build step 4). Same shape as the data format.
-  fallbackLevel: {
-    id: 'party',
-    crushMessage: 'hey are u going to the party?',
-    answers: [
-      { words: ['yeah', "i'll", 'be', 'there'], tone: 'chill', reply: 'cool see u there' },
-      { words: ['only', 'if', 'you', 'are'], tone: 'flirty', reply: 'omg 😳' },
-    ],
-    badWords: ['u up?', 'lol', 'k', 'sorry', '😳'],
-    patterns: ['rain'],
-    bulletSpeed: 1.0,
-    timeLimit: 20,
-    failReplies: ['seen 11:42pm', '???', 'who is this'],
-  },
 };
 
 const Game = {
@@ -50,6 +35,8 @@ const Game = {
   locked: null,     // index of the answer the player committed to (null until first good word)
   next: 0,          // index of the next word needed in the locked answer
   done: false,      // sentence completed
+  timedOut: false,  // timer ran out
+  timeLeft: 0,
   hits: 0,
   time: 0,
   badWords: [],
@@ -57,7 +44,7 @@ const Game = {
   patternState: {},
 
   start(level) {
-    this.level = level || GAME_CONFIG.fallbackLevel;
+    this.level = level;
     const a = this.area;
     this.player = { x: a.x + a.w / 2, y: a.y + a.h - 60, invuln: 0, focus: false };
     this.bullets = [];
@@ -67,6 +54,8 @@ const Game = {
     this.locked = null;
     this.next = 0;
     this.done = false;
+    this.timedOut = false;
+    this.timeLeft = this.level.timeLimit;
     this.hits = 0;
     this.time = 0;
     this.badWords = this.level.badWords;
@@ -75,6 +64,11 @@ const Game = {
   },
 
   // ----- Result (read by main.js when the level ends) -----
+
+  // Level is over: sentence complete, or time ran out (sends whatever is in the bar).
+  finished() {
+    return this.done || this.timedOut;
+  },
 
   message() {
     return this.entries.map((e) => e.text).join(' ');
@@ -111,8 +105,14 @@ const Game = {
   },
 
   update(dt) {
-    if (this.done) return;
+    if (this.finished()) return;
     this.time += dt;
+    this.timeLeft -= dt;
+    if (this.timeLeft <= 0) {
+      this.timeLeft = 0;
+      this.timedOut = true;
+      return;
+    }
     this.updatePlayer(dt);
 
     for (const name of this.patternNames) {
@@ -294,8 +294,18 @@ const Game = {
 
   // ----- Drawing -----
 
+  drawTimerBar() {
+    const a = this.area;
+    const frac = Math.max(0, this.timeLeft / this.level.timeLimit);
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(a.x, a.y - 9, a.w, 6);
+    ctx.fillStyle = this.timeLeft < 5 ? '#e74c3c' : '#f1c40f';
+    ctx.fillRect(a.x, a.y - 9, a.w * frac, 6);
+  },
+
   draw() {
     const a = this.area;
+    this.drawTimerBar();
 
     // Play area backdrop; everything inside is clipped to it.
     ctx.save();
