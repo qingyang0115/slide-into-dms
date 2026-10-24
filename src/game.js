@@ -8,7 +8,7 @@ const GAME_CONFIG = {
     speed: 260,       // px/sec
     focusSpeed: 110,  // px/sec while holding Shift
     hitRadius: 4,     // small hitbox (bullet hell feel)
-    drawSize: 24,
+    drawSize: 56,
   },
   chip: {
     height: 28,

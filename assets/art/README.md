@@ -42,8 +42,8 @@ it will look softer than the rest. For crisper sprites, export frames at **400×
 | `bubble_player.png` | about 626×300, stretches | Finn's reply bubble holding the collected words. Same note. |
 | `char_crush_amused.png` | 192×192 | Clover's avatar after a clean message (and the happy replies). |
 | `char_crush_unimpressed.png` | 192×192 | Clover's avatar when satisfaction drops and after a fail. |
+| `char_player_idle.png` | 192×192 | Finn's default avatar and the avatar shown after a pass. |
 | `char_player_panic.png` | 192×192 | Finn's avatar when anxiety is elevated and on the fail result screen. |
-| `char_player_happy.png` | 192×192 | Finn's avatar on the pass result screen. |
 | `fx_sweat_vignette.png` | 900×1600 | Full-screen overlay that fades in as anxiety rises (transparent in the middle, sweaty/dark at the edges). |
 
 ### 2. Story scenes

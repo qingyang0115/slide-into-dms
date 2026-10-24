@@ -28,7 +28,6 @@ const PRELOAD = [
   'char_crush_unimpressed.png',
   'char_player_idle.png',
   'char_player_panic.png',
-  'char_player_happy.png',
   'fx_sweat_vignette.png',
   'screen_title.png',
   'screen_gameover.png',
@@ -334,7 +333,7 @@ const states = {
       drawPhoneBackground();
       Chat.drawCrushMessage(Game.level.crushMessage, r.death ? 'unimpressed' : 'neutral');
       Chat.drawReplyBar(r.entries, '(you sent nothing...)', 0, r.death ? 0.35 : 0);
-      Chat.drawPlayerAvatar(r.success ? 'happy' : 'panic');
+      Chat.drawPlayerAvatar(r.success ? 'idle' : 'panic');
       if (r.death) this.drawReveal(r);
       const replyDy = r.death ? 425 : 270;
       if (!this.replyShown()) {

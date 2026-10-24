@@ -176,7 +176,7 @@ assets/
 |---|---|---|
 | solid grey background | Gameplay and result screen background, drawn by code | full screen |
 | `player_heart.png` | Player sprite in bullet phase (a little sweating heart, not a slide) | 24×24 |
-| `char_player_idle.png`, `char_player_panic.png`, `char_player_happy.png` | Finn's avatar, a **fish slipper** (reactions switch by anxiety/result) | 96×96 |
+| `char_player_idle.png`, `char_player_panic.png` | Finn's avatar, a **fish slipper** (reactions switch by anxiety/result; idle is used for successful results) | 96×96 |
 | `char_crush_neutral.png`, `char_crush_amused.png`, `char_crush_unimpressed.png` | Clover's avatar, a **bunny slipper** with long ears | 96×96 (192×192 file at 2×) |
 | `bubble_crush.png`, `bubble_player.png` | Chat bubbles (9-slice if possible) | stretchable |
 | `chip_good.png`, `chip_bad.png` | Word bullet backgrounds (text drawn on top in code) | stretchable |
