@@ -7,11 +7,14 @@
         { "words": ["yeah", "i'll", "be", "there"], "tone": "chill", "reply": "cool see u there" },
         { "words": ["only", "if", "you", "are"], "tone": "flirty", "reply": "omg 😳" }
       ],
-      "badWords": ["u", "up?", "lol", "sorry", "k"],
+      "badWords": ["u up?", "lol", "sorry", "k", "g"],
       "patterns": ["rain"],
       "bulletSpeed": 1.0,
       "timeLimit": 25,
-      "failReplies": ["seen 11:42pm", "???", "who is this"]
+      "failReplies": ["seen 11:42pm", "???", "who is this"],
+      "deathPhrases": [
+        { "phrase": "i'll beg", "reply": "pls don't beg, it's literally just a party 😭" }
+      ]
     },
     {
       "id": "study",
@@ -21,11 +24,14 @@
         { "words": ["i'd", "study", "anything", "with", "you"], "tone": "flirty", "reply": "...ok that was smooth" },
         { "words": ["i", "am", "the", "math"], "tone": "unhinged", "reply": "wow ok. see u at 4" }
       ],
-      "badWords": ["u up?", "lol", "sorry", "k", "😳", "hi"],
+      "badWords": ["u up?", "lol", "sorry", "k", "😳", "walrus"],
       "patterns": ["rain"],
       "bulletSpeed": 1.2,
       "timeLimit": 25,
-      "failReplies": ["did u just send that to the group chat", "typing... typing... nvm", "my phone auto-corrected u to 'weirdo'"]
+      "failReplies": ["did u just send that to the group chat", "typing... typing... nvm", "my phone auto-corrected u to 'weirdo'"],
+      "deathPhrases": [
+        { "phrase": "i am the walrus", "reply": "...the WALRUS?? i have so many questions" }
+      ]
     },
     {
       "id": "who",
@@ -35,11 +41,14 @@
         { "words": ["the", "cute", "one", "yes"], "tone": "flirty", "reply": "lol confident. i like it" },
         { "words": ["i", "contain", "multitudes"], "tone": "unhinged", "reply": "...who ARE you" }
       ],
-      "badWords": ["u up?", "lol", "sorry", "k", "😳", "hi", "uhh", "um"],
+      "badWords": ["u up?", "lol", "sorry", "k", "😳", "uhh", "um", "not"],
       "patterns": ["rain"],
       "bulletSpeed": 1.4,
       "timeLimit": 25,
-      "failReplies": ["seen 11:42pm", "i'm gonna pretend i didn't read that", "blocked? no. but i'm thinking about it"]
+      "failReplies": ["seen 11:42pm", "i'm gonna pretend i didn't read that", "blocked? no. but i'm thinking about it"],
+      "deathPhrases": [
+        { "phrase": "that's not me", "reply": "ok so then who am i talking to?? 😭" }
+      ]
     }
   ]
 }

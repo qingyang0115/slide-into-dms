@@ -3,7 +3,7 @@
 
 const CHAT_CONFIG = {
   crushAvatar: { x: 15, y: 12, size: 96 },
-  crushBubble: { x: 122, y: 24, w: 313, h: 80, pad: 14, font: '16px system-ui, sans-serif', lineHeight: 22 },
+  crushBubble: { x: 122, y: 24, w: 313, h: 70, pad: 14, font: '16px system-ui, sans-serif', lineHeight: 22 },
   replyBubble: { x: 15, y: 118, w: 313, h: 150, pad: 14, chipGap: 6 },
   playerAvatar: { x: 339, y: 118, size: 96 },
   colors: {
@@ -110,9 +110,21 @@ const Chat = {
     Assets.draw(ctx, `char_player_${face}.png`, av.x, av.y, av.size, av.size, 'circle');
   },
 
-  drawReplyBar(entries, emptyText = 'your reply...', wobble = 0) {
+  // flash (0..1): red pulse over the bubble, used as the death phrase telegraph.
+  drawReplyBar(entries, emptyText = 'your reply...', wobble = 0, flash = 0) {
     const r = CHAT_CONFIG.replyBubble;
     this.bubble('bubble_player.png', CHAT_CONFIG.colors.bubblePlayer, r);
+    if (flash > 0) {
+      ctx.save();
+      ctx.fillStyle = `rgba(231,76,60,${flash})`;
+      ctx.strokeStyle = `rgba(255,60,60,${Math.min(1, flash * 2)})`;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(r.x, r.y, r.w, r.h, 18);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
 
     if (!entries.length) {
       ctx.fillStyle = 'rgba(255,255,255,0.6)';
@@ -152,12 +164,15 @@ const Chat = {
     });
   },
 
-  // Live chat view during the bullet phase: face and wobble follow anxiety.
+  // Live chat view during the bullet phase. Wobble and the protagonist's face follow anxiety;
+  // the crush's face follows satisfaction (or turns suspicious on a death phrase warning).
   draw(crushMessage, entries) {
     const wobble = Anxiety.wobbleAmp();
-    this.drawCrushMessage(crushMessage, 'neutral', 0, wobble);
-    this.drawReplyBar(entries, 'your reply...', wobble);
+    const flash = Game.deathWarning ? 0.3 + 0.2 * Math.sin(performance.now() / 80) : 0;
+    this.drawCrushMessage(crushMessage, Game.crushFace(), 0, wobble);
+    this.drawReplyBar(entries, 'your reply...', wobble, flash);
     this.drawPlayerAvatar(Anxiety.face());
     Anxiety.drawMeter();
+    Satisfaction.drawMeter();
   },
 };

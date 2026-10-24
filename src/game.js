@@ -1,5 +1,5 @@
 // Bullet phase: player movement, bad-word bullets, good words, reply assembly, collisions.
-// Timer + crush reply (step 4) and anxiety (step 5) plug in here later.
+// Ends with an endReason: 'complete' | 'timeout' | 'satisfaction' | 'death' (main.js turns it into the crush's reply).
 
 const GAME_CONFIG = {
   // Play area inside the phone screen (logical px). Chat UI sits above it.
@@ -34,9 +34,9 @@ const Game = {
   entries: [],      // the reply bar: { text, kind: 'good' | 'bad' | 'misplaced' }
   locked: null,     // index of the answer the player committed to (null until first good word)
   next: 0,          // index of the next word needed in the locked answer
-  done: false,      // sentence completed
-  timedOut: false,  // timer ran out
-  panicked: false,  // anxiety maxed out
+  endReason: null,  // why the level ended (null while playing)
+  death: null,      // the death phrase that fired, if any: { phrase, reply }
+  deathWarning: false, // bar is one word from a death phrase (telegraph)
   timeLeft: 0,
   hits: 0,
   time: 0,
@@ -54,10 +54,11 @@ const Game = {
     this.entries = [];
     this.locked = null;
     this.next = 0;
-    this.done = false;
-    this.timedOut = false;
-    this.panicked = false;
+    this.endReason = null;
+    this.death = null;
+    this.deathWarning = false;
     Anxiety.reset();
+    Satisfaction.reset();
     this.timeLeft = this.level.timeLimit;
     this.hits = 0;
     this.time = 0;
@@ -68,9 +69,14 @@ const Game = {
 
   // ----- Result (read by main.js when the level ends) -----
 
-  // Level is over: sentence complete, time ran out, or anxiety maxed (sends whatever is in the bar).
+  // Level is over: sentence complete, time ran out, satisfaction empty, or a death phrase formed.
   finished() {
-    return this.done || this.timedOut || this.panicked;
+    return this.endReason !== null;
+  },
+
+  // Crush avatar: suspicious while a death phrase is one word away, otherwise follows satisfaction.
+  crushFace() {
+    return this.deathWarning ? 'suspicious' : Satisfaction.face();
   },
 
   message() {
@@ -79,7 +85,7 @@ const Game = {
 
   // Clean = the whole sentence was collected with no bad or misplaced words in it.
   isClean() {
-    return this.done && this.entries.every((e) => e.kind === 'good');
+    return this.endReason === 'complete' && this.entries.every((e) => e.kind === 'good');
   },
 
   lockedAnswer() {
@@ -113,7 +119,7 @@ const Game = {
     this.timeLeft -= dt;
     if (this.timeLeft <= 0) {
       this.timeLeft = 0;
-      this.timedOut = true;
+      this.endReason = 'timeout';
       return;
     }
     this.updatePlayer(dt);
@@ -128,7 +134,6 @@ const Game = {
     this.updateBullets(dt);
     this.syncGoods(dt);
     this.updateGoods(dt);
-    if (!this.done && Anxiety.maxed()) this.panicked = true;
   },
 
   updatePlayer(dt) {
@@ -173,9 +178,15 @@ const Game = {
         continue;
       }
 
-      if (p.invuln <= 0 && this.circleHitsRect(p.x, p.y, GAME_CONFIG.player.hitRadius, b, GAME_CONFIG.chip.hitShrink)) {
-        this.onBadHit(b);
-        this.bullets.splice(i, 1);
+      if (p.invuln <= 0) {
+        if (this.circleHitsRect(p.x, p.y, GAME_CONFIG.player.hitRadius, b, GAME_CONFIG.chip.hitShrink)) {
+          this.onBadHit(b);
+          this.bullets.splice(i, 1);
+        } else if (!b.nearMissed &&
+                   this.circleHitsRect(p.x, p.y, ANXIETY_CONFIG.nearMissRadius, b, GAME_CONFIG.chip.hitShrink)) {
+          b.nearMissed = true; // each bad word counts once
+          Anxiety.add(ANXIETY_CONFIG.nearMissRise);
+        }
       }
     }
   },
@@ -189,12 +200,32 @@ const Game = {
     return dx * dx + dy * dy <= r * r;
   },
 
-  // Bad word touched: it gets inserted into the message and spikes anxiety.
+  // Every word that lands in the reply bar goes through here: checks for a death phrase
+  // (instant fail) and updates the one-word-away telegraph.
+  addEntry(text, kind) {
+    this.entries.push({ text, kind });
+    const death = DeathPhrase.match(this.level, this.entries);
+    if (death) {
+      this.death = death;
+      this.endReason = 'death'; // beats anything else that ends the level on this same word
+    } else {
+      this.deathWarning = DeathPhrase.oneAway(this.level, this.entries);
+    }
+  },
+
+  // A mistake costs satisfaction; at zero the message sends and the level fails.
+  checkSatisfaction() {
+    if (this.endReason === null && Satisfaction.empty()) this.endReason = 'satisfaction';
+  },
+
+  // Bad word touched: it gets inserted into the message, drains satisfaction, spikes anxiety.
   onBadHit(b) {
     this.hits++;
-    Anxiety.add(ANXIETY_CONFIG.badHit);
-    this.entries.push({ text: b.text, kind: 'bad' });
+    Anxiety.add(ANXIETY_CONFIG.hitRise);
+    Satisfaction.lose(SATISFACTION_CONFIG.badHitLoss);
     this.player.invuln = GAME_CONFIG.hitInvulnTime;
+    this.addEntry(b.text, 'bad');
+    this.checkSatisfaction();
   },
 
   // ----- Good words -----
@@ -281,24 +312,27 @@ const Game = {
       } else if (p.invuln <= 0) {
         // Right word, wrong time: it lands in the message anyway. It respawns so the
         // sentence can still be finished (but the message is now garbled).
-        this.entries.push({ text: g.text, kind: 'misplaced' });
-        Anxiety.add(ANXIETY_CONFIG.misplacedHit);
+        Anxiety.add(ANXIETY_CONFIG.misplacedRise);
+        Satisfaction.lose(SATISFACTION_CONFIG.misplacedLoss);
         p.invuln = GAME_CONFIG.hitInvulnTime;
         this.goods.splice(i, 1);
+        this.addEntry(g.text, 'misplaced');
+        this.checkSatisfaction();
       }
     }
   },
 
   collectGood(g) {
-    this.entries.push({ text: g.text, kind: 'good' });
-    Anxiety.add(-ANXIETY_CONFIG.goodRelief);
+    Anxiety.add(-ANXIETY_CONFIG.correctDrop);
+    this.addEntry(g.text, 'good');
     if (this.locked === null) {
       this.locked = g.answer; // first word picks which sentence we're building
       this.next = 1;
     } else {
       this.next++;
     }
-    if (this.next >= this.level.answers[this.locked].words.length) this.done = true;
+    // A death phrase formed by this same word wins over completing the sentence.
+    if (this.endReason === null && this.next >= this.level.answers[this.locked].words.length) this.endReason = 'complete';
   },
 
   // ----- Drawing -----

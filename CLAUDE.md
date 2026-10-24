@@ -4,7 +4,7 @@ Game jam entry. Theme: **"slide"**. Time limit: **1.5 days**. Scope ruthlessly.
 
 ## Concept
 
-The player is a nervous loser trying to slide into their crush's DMs. Replying is a **bullet hell minigame** inside a phone screen: collect the right words in order, dodge the cringe ones. Whatever you collect gets sent, so mistakes produce a garbled, embarrassing message and the crush reacts to it.
+The player is a nervous loser trying to slide into their crush's DMs. Replying is a **bullet hell minigame** inside a phone screen: collect the right words in order, dodge the cringe ones. Whatever you collect gets sent, so mistakes produce a garbled, embarrassing message and the crush reacts to it. Two separate meters track how it's going: the crush's **satisfaction** (health) and the player's **anxiety** (difficulty).
 
 ## Game flow
 
@@ -17,14 +17,44 @@ Story scenes are visual-novel style: character sprites on a background, speech b
 1. **Crush message** appears at the top of the phone chat (with a "typing..." indicator first).
 2. **Bullet phase starts.** The player controls a small sprite (sweating heart) inside the play area.
    - **Target words** drift/slide around. Touching the *next correct word* adds it to the reply bar.
-   - **Bad words** ("u up?", "lol", "k", "sorry", "😳") fire in bullet patterns. Touching one **inserts it into the message** and raises anxiety.
-   - Touching a correct word out of order also counts as a mistake (inserted in the wrong place).
-3. **Anxiety meter** rises over time and on hits. Higher anxiety = faster bullets, screen shake, sweat vignette, text wobble.
-4. **Send:** the message auto-sends when the sentence is complete, or when the timer runs out / anxiety maxes (sends whatever is in the bar).
-5. **Crush reply** depends on result:
-   - Clean message → the level's ending branch for success.
-   - Garbled message → funny fail reaction ("seen 11:42pm", "who is this", etc.).
+   - **Bad words** ("u up?", "lol", "k", "sorry", "😳") fire in bullet patterns. Touching one **inserts it into the message**, **lowers crush satisfaction**, and **raises anxiety**. It never ends the level on its own.
+   - Touching a correct word out of order is a **smaller mistake**: it is inserted in the wrong place and costs less satisfaction than a bad word.
+3. **Two meters** run during the phase (see "Meters" below). Satisfaction is the health bar. Anxiety is the difficulty driver and can never make you lose.
+4. **Send:** the message auto-sends as soon as any of these happens:
+   - the sentence is complete,
+   - the timer runs out (sends whatever is in the bar),
+   - satisfaction hits zero,
+   - a **death phrase** forms in the reply bar (see "Death phrases").
+5. **Crush reply** depends on the outcome:
+   - **Sentence completed with satisfaction left** → level passed. The reply is the answer's `reply`. A perfectly clean message gets the amused face; a message with mistakes in it still passes, but the crush stays neutral.
+   - **Satisfaction empty or timeout** → level failed, with a generic funny reaction from `failReplies` ("seen 11:42pm", "who is this", etc.).
+   - **Death phrase** → level failed instantly, with the special reveal and the phrase's own `reply`.
 6. Next level, or game over screen with retry.
+
+## Meters
+
+### Satisfaction (crush health, shown near the crush's avatar)
+
+- Starts full. Bad-word hit: big loss (default: about **3 hits empties it**). Correct word touched out of order: smaller loss.
+- The crush's avatar face follows it: neutral, then unimpressed as it drops.
+- At zero, the garbled message sends and the level is failed with a generic fail reply.
+
+### Anxiety (difficulty driver, shown next to the protagonist)
+
+- Does **not** cause losing. It only changes difficulty and feel: bullet speed, screen shake, text wobble, sweat vignette, protagonist face.
+- Rises steadily over time during the bullet phase, on bad-word hits, and slightly on **near-misses** (a bad word passing within a small radius of the player without touching).
+- Drops a little each time a correct word is collected.
+- All rates (time rise, hit rise, near-miss rise, near-miss radius, correct-word drop) live in `ANXIETY_CONFIG`.
+
+## Death phrases
+
+Rare, coherent, **telegraphed** instant fails. A death phrase forms when individual words combine in the reply bar, possibly across word boundaries. Example: the good words "be" and "at" and the bad word "u up" are each scored normally on their own, but if the bar reads "be at u up" in sequence, that reads as "beat u up" and the level fails instantly, even if satisfaction isn't empty.
+
+- **Matching:** after every word is added to the bar, the assembled message and each death phrase are compared lowercased with all spaces (and `. , ! ? '`) removed, as a substring match. So "be at u up" matches "beat u up". On a match, the message sends immediately. A death phrase beats every other end condition that happens on the same word.
+- **Fairness:** every death phrase must require at least one bad word, so a correct answer can never trigger one (misplaced good words count as good words). On level load the game checks this and logs a `console.warn` if a phrase could be built from good words alone, would match a correct answer, or is unreachable even with the bad words.
+- **Telegraph:** if the bar is one word away from completing a death phrase, the reply bar flashes red and the crush switches to a suspicious face (`char_crush_suspicious.png`), so the player can see it coming and dodge.
+- **Fail screen:** show the sent message, then reveal what it reads as with a highlight (e.g. "be at u up" → **BEAT U UP**) and a slow zoom, then the crush's special reply. The reveal is the comedic payoff.
+- **Content rules:** each level has exactly one death phrase. Design the phrase first, then adjust that level's good and bad words so it is actually reachable. Keep phrases silly, never threatening or crude.
 
 ## Branching endings
 
@@ -50,7 +80,9 @@ src/
   game.js        # bullet phase: loop, collisions, scoring
   patterns.js    # bullet pattern definitions
   chat.js        # chat UI: crush messages, typing indicator, reply bar
-  anxiety.js     # anxiety meter + its effects
+  anxiety.js     # anxiety meter (difficulty) + its effects
+  satisfaction.js # crush satisfaction meter (health) + crush face
+  deathphrase.js # death phrase matching, telegraph check, level validation
   assets.js      # asset loading with placeholder fallback
   audio.js       # sound effects
 data/
@@ -77,7 +109,7 @@ assets/
 | `bg_phone.png` | Phone frame / chat background | full screen |
 | `player_heart.png` | Player sprite in bullet phase | 24×24 |
 | `char_player_idle.png`, `char_player_sweat.png`, `char_player_panic.png`, `char_player_happy.png` | Protagonist reactions (switch by anxiety/result) | 96×96 |
-| `char_crush_neutral.png`, `char_crush_amused.png`, `char_crush_unimpressed.png` | Crush avatar reactions | 96×96 |
+| `char_crush_neutral.png`, `char_crush_amused.png`, `char_crush_unimpressed.png`, `char_crush_suspicious.png` | Crush avatar reactions (`suspicious` = death phrase telegraph) | 96×96 (192×192 file at 2×) |
 | `bubble_crush.png`, `bubble_player.png` | Chat bubbles (9-slice if possible) | stretchable |
 | `chip_good.png`, `chip_bad.png` | Word bullet backgrounds (text drawn on top in code) | stretchable |
 | `fx_sweat_vignette.png` | High-anxiety overlay | full screen |
@@ -115,7 +147,10 @@ All content is data. Adding a level must never require code changes.
       "patterns": ["rain", "aimed"],
       "bulletSpeed": 1.0,
       "timeLimit": 20,
-      "failReplies": ["seen 11:42pm", "???", "who is this"]
+      "failReplies": ["seen 11:42pm", "???", "who is this"],
+      "deathPhrases": [
+        { "phrase": "i'll beg", "reply": "pls don't beg, it's literally just a party 😭" }
+      ]
     }
   ]
 }
@@ -123,6 +158,8 @@ All content is data. Adding a level must never require code changes.
 
 - `answers`: one or more valid sentences. Whichever the player starts collecting first becomes the target (the first word of each answer is spawned as a good word at the start).
 - `patterns`: names from `patterns.js`, cycled through during the level.
+- `deathPhrases` (optional, exactly one per shipped level): `phrase` is what the bar reads as when it triggers, `reply` is the crush's special reaction. Each must need at least one bad word (e.g. "i'll beg" = good "i'll", good "be", bad "g"). See "Death phrases".
+- `failReplies`: generic fail reactions (satisfaction empty, timeout).
 - Difficulty ramps through the level data (`bulletSpeed`, `timeLimit`, more `badWords`), not code.
 
 ## Story data format (`data/story.json`)
@@ -165,7 +202,7 @@ Make one pattern feel good before adding the next.
 2. Player movement in the play area (with Shift focus mode), plus a single `rain` pattern.
 3. Good words, the reply bar, collision rules (correct / wrong order / bad word), and message assembly.
 4. Timer, auto-send, crush reply (success vs garbled fail), level loading from `levels.json`.
-5. Anxiety meter and its effects (speed, shake, vignette, protagonist face swap).
+5. Satisfaction meter (health, crush face), anxiety meter and its effects (speed, shake, vignette, protagonist face), and death phrases (match, telegraph, reveal).
 6. Story system: `story.json` loading, background, sprites with the spritesheet helper, speech bubbles, typewriter, advance/skip, effects. Wire scenes into the game flow with `next` / `afterWin` / `afterFail`.
 7. Remaining patterns and branching answers/tones, plus the final ending scene based on tone counts.
 8. Juice: typing indicator, hit flash, send whoosh, screen shake, sound effects, transitions between story and gameplay.

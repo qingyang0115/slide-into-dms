@@ -1,12 +1,15 @@
 // Anxiety meter + its effects: faster bullets, screen shake, text wobble,
-// sweat vignette, protagonist face. Game feeds it (time, hits); everything else reads it.
+// sweat vignette, protagonist face. It is the difficulty driver only: it never ends a level
+// (losing is satisfaction.js / the timer / death phrases). Game feeds it; everything else reads it.
 
 const ANXIETY_CONFIG = {
   max: 100,
-  baseRate: 1.5,     // anxiety per second just from existing
-  badHit: 12,        // touched a bad word
-  misplacedHit: 8,   // touched a good word at the wrong time
-  goodRelief: 4,     // collecting a correct word calms you down a little
+  timeRise: 3.0,        // anxiety per second during the bullet phase
+  hitRise: 10,          // touched a bad word
+  misplacedRise: 6,     // touched a correct word out of order
+  nearMissRise: 3,      // a bad word passed close without touching
+  nearMissRadius: 28,   // px from the player's centre to the chip's hitbox edge
+  correctDrop: 6,       // collecting a correct word calms you down
   speedBoost: 0.6,   // bullets are up to +60% faster at max anxiety
   shake: { start: 0.5, maxPx: 5 },        // screen shake begins at 50% anxiety
   wobble: { start: 0.35, maxPx: 3 },      // text wobble begins at 35%
@@ -27,15 +30,11 @@ const Anxiety = {
   },
 
   update(dt) {
-    this.add(ANXIETY_CONFIG.baseRate * dt);
+    this.add(ANXIETY_CONFIG.timeRise * dt);
   },
 
   ratio() {
     return this.value / ANXIETY_CONFIG.max;
-  },
-
-  maxed() {
-    return this.value >= ANXIETY_CONFIG.max;
   },
 
   // 0 below `start`, ramping to 1 at max anxiety.

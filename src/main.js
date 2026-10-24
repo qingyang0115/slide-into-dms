@@ -4,7 +4,14 @@ const CONFIG = {
   width: 450,  // logical resolution (phone portrait)
   height: 800,
   replyDelay: 1.0, // seconds before the crush's reply appears on the result screen
-};
+  // Death phrase fail screen timeline (seconds since the result screen opened).
+  death: {
+    readsAsAt: 1.2,  // "which reads as..." fades in (after showing the sent message)
+    phraseAt: 2.0,   // the highlighted phrase slams in
+    zoomTime: 3.5,   // how long the slow zoom on the phrase lasts
+    zoomMax: 1.35,   // final zoom factor
+    replyAt: 4.5,    // the crush's special reply appears
+  },};
 
 // Every image the game may use. Missing ones become labeled placeholders.
 const PRELOAD = [
@@ -17,6 +24,7 @@ const PRELOAD = [
   'char_crush_neutral.png',
   'char_crush_amused.png',
   'char_crush_unimpressed.png',
+  'char_crush_suspicious.png',
   'char_player_idle.png',
   'char_player_sweat.png',
   'char_player_panic.png',
@@ -90,6 +98,13 @@ function drawFullscreen(name) {
   Assets.draw(ctx, name, 0, 0, CONFIG.width, CONFIG.height);
 }
 
+// Small caption under the crush's reply explaining how the level ended.
+const OUTCOME_NOTES = {
+  complete: (r) => (r.clean ? '' : '(sent, with a few extras...)'),
+  timeout: () => '(time ran out)',
+  satisfaction: () => '(she lost interest)',
+};
+
 // ---------- States ----------
 const states = {
   title: {
@@ -114,17 +129,26 @@ const states = {
       Game.update(dt);
       if (Game.finished()) this.send();
     },
-    // Locks in the bar as the sent message and picks the crush's reaction.
+    // Locks in the bar as the sent message and picks the crush's reaction from Game.endReason.
+    // Passing = sentence completed with satisfaction left (even with mistakes in the message).
     send() {
-      const success = Game.isClean();
+      const outcome = Game.endReason;
+      const success = outcome === 'complete';
       const answer = Game.lockedAnswer();
       const fails = Game.level.failReplies;
       if (success) progress.tones[answer.tone] = (progress.tones[answer.tone] || 0) + 1;
+      let reply;
+      if (success) reply = answer.reply;
+      else if (outcome === 'death') reply = Game.death.reply;
+      else reply = fails[Math.floor(Math.random() * fails.length)];
       progress.lastResult = {
         success,
+        outcome,
+        clean: Game.isClean(),
         entries: Game.entries.slice(),
-        reply: success ? answer.reply : fails[Math.floor(Math.random() * fails.length)],
+        reply,
         tone: success ? answer.tone : null,
+        death: outcome === 'death' ? { phrase: Game.death.phrase } : null,
       };
       setState('result');
     },
@@ -143,6 +167,7 @@ const states = {
   },
 
   // Chat view: your sent message, then (after a beat) the crush's reaction.
+  // A death phrase gets a longer fail screen: reveal what the message reads as, then her reply.
   result: {
     enter() {
       this.t = 0;
@@ -150,22 +175,67 @@ const states = {
     update(dt) {
       this.t += dt;
     },
+    replyAt() {
+      return progress.lastResult.death ? CONFIG.death.replyAt : CONFIG.replyDelay;
+    },
     replyShown() {
-      return this.t >= CONFIG.replyDelay;
+      return this.t >= this.replyAt();
+    },
+    drawReveal(r) {
+      const c = CONFIG.death, t = this.t;
+      if (t >= c.readsAsAt) {
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, (t - c.readsAsAt) / 0.4);
+        drawCenteredText('which reads as...', 322, 18, '#ddd');
+        ctx.restore();
+      }
+      if (t < c.phraseAt) return;
+
+      const dt = t - c.phraseAt;
+      const pop = Math.min(1, dt / 0.25);
+      const zoom = 1 + (c.zoomMax - 1) * Math.min(1, dt / c.zoomTime); // slow zoom
+      const scale = (0.3 + 0.7 * (1 - Math.pow(1 - pop, 3))) * zoom;   // slam-in, then zoom
+      const shake = dt < 0.4 ? (1 - dt / 0.4) * 6 : 0;
+      const text = r.death.phrase.toUpperCase();
+
+      ctx.save();
+      let size = 40;
+      ctx.font = `bold ${size}px system-ui, sans-serif`;
+      while (size > 16 && ctx.measureText(text).width > 280) {
+        size -= 2;
+        ctx.font = `bold ${size}px system-ui, sans-serif`;
+      }
+      const w = ctx.measureText(text).width + 28, h = size + 18;
+      ctx.translate(CONFIG.width / 2 + (Math.random() - 0.5) * 2 * shake, 375 + (Math.random() - 0.5) * 2 * shake);
+      ctx.rotate(-0.03);
+      ctx.scale(scale, scale);
+      ctx.fillStyle = '#ffe066'; // highlighter
+      ctx.fillRect(-w / 2, -h / 2, w, h);
+      ctx.fillStyle = '#b00020';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, 0, 2);
+      ctx.restore();
     },
     draw() {
       const r = progress.lastResult;
       drawFullscreen('bg_phone.png');
-      Chat.drawCrushMessage(Game.level.crushMessage);
-      Chat.drawReplyBar(r.entries, '(you sent nothing...)');
+      Chat.drawCrushMessage(Game.level.crushMessage, r.death ? 'suspicious' : 'neutral');
+      Chat.drawReplyBar(r.entries, '(you sent nothing...)', 0, r.death ? 0.35 : 0);
       Chat.drawPlayerAvatar(r.success ? 'happy' : 'panic');
+      if (r.death) this.drawReveal(r);
       if (!this.replyShown()) return;
-      Chat.drawCrushMessage(r.reply, r.success ? 'amused' : 'unimpressed', 270);
+
+      // Pass with a clean message: amused. Pass with mistakes: neutral. Fail: unimpressed.
+      const face = r.success ? (r.clean ? 'amused' : 'neutral') : 'unimpressed';
+      Chat.drawCrushMessage(r.reply, face, r.death ? 425 : 270);
+      const note = OUTCOME_NOTES[r.outcome] && OUTCOME_NOTES[r.outcome](r);
+      if (note) drawCenteredText(note, 570, 14, '#ddd');
       drawCenteredText('press Space / click', 600, 16, '#ffd');
     },
     onConfirm() {
       if (!this.replyShown()) {
-        this.t = CONFIG.replyDelay; // first press just skips the wait
+        this.t = this.replyAt(); // first press just skips the wait
         return;
       }
       if (!progress.lastResult.success) return setState('gameover');
@@ -235,6 +305,7 @@ Promise.all([
   }),
 ]).then(([, data]) => {
   levelData.levels = data.levels;
+  DeathPhrase.validate(levelData.levels); // console.warns any unfair or unreachable death phrase
   setState('title');
   requestAnimationFrame(frame);
 }).catch((err) => {
