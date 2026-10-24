@@ -117,7 +117,7 @@
         { "text": "the next morning. corridor B. the floor is freshly mopped. again." },
         { "speaker": "crush", "sprite": "story_crush_amused_sheet.png", "position": "right", "text": "walk with me to class? try not to slip this time.", "effect": "slideIn" },
         { "speaker": "player", "sprite": "story_player_happy_sheet.png", "position": "left", "text": "...no promises.", "effect": "bounce" },
-        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "center", "text": "I TOLD YOU. SLIDE. INTO. THE. DMS.", "effect": "slideIn" },
+        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "center", "text": "I TOLD YOU. SLIDE. INTO. HER. DMS.", "effect": "slideIn" },
         { "text": "they walked to class together. Finn only slipped twice. a personal record." }
       ],
       "next": "end"
@@ -126,8 +126,7 @@
       "background": "bg_classroom.png",
       "lines": [
         { "speaker": "crush", "sprite": "story_crush_neutral_sheet.png", "position": "right", "text": "you're funny, Finn. let's be friends?" },
-        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "friends. yes. great. love that for us." },
-        { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "center", "text": "...friend zone. with extra steps.", "effect": "fadeIn" },
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "friends. umm. great. love that for us." },
         { "speaker": "crush", "sprite": "story_crush_amused_sheet.png", "position": "right", "text": "also i'm taking the other corridor. just so you know." },
         { "text": "Finn gained a friend and lost nothing but a little dignity. it was already on the floor." }
       ],

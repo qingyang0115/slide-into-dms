@@ -15,7 +15,7 @@
       "timeLimit": 25,
       "failReplies": ["seen 9:41pm", "...who is this", "ok. i'm pretending that was a typo"],
       "deathPhrases": [
-        { "phrase": "that was meow", "reply": "...did you just meow at me?? i'm a BUNNY 😭" }
+        { "phrase": "that was meow", "reply": "...did you just meow at me??" }
       ]
     },
     {
@@ -24,9 +24,9 @@
       "afterFail": "scene:fail_smalltalk",
       "crushMessage": "so what do you do for fun? besides tackling people in hallways",
       "answers": [
-        { "words": ["mostly", "naps", "honestly"], "tone": "chill", "reply": "same. naps are elite 😴" },
+        { "words": ["mostly", "naps", "honestly"], "tone": "chill", "reply": "same. i luv snoozing 😴" },
         { "words": ["tackling", "you", "was", "my", "highlight"], "tone": "flirty", "reply": "flattering. get it? because you flattened me" },
-        { "words": ["i", "collect", "banana", "peels"], "tone": "unhinged", "reply": "...that explains the hallway." }
+        { "words": ["i", "collect", "banana", "peels"], "tone": "unhinged", "reply": "...that explains it i guess." }
       ],
       "badWords": ["sorry", "lol", "u up?", "my bad", "haha", "k", "bunnies"],
       "patterns": ["rain"],
@@ -34,18 +34,18 @@
       "timeLimit": 25,
       "failReplies": ["...are you ok", "typing... typing... never mind", "i'm gonna go look at a wall now"],
       "deathPhrases": [
-        { "phrase": "i collect bunnies", "reply": "...am i going in the collection?? 😭" }
+        { "phrase": "i collect bunnies", "reply": "...thats not creepy at all" }
       ]
     },
     {
       "id": "teasing",
       "afterWin": "scene:after_teasing",
       "afterFail": "scene:fail_teasing",
-      "crushMessage": "be honest. do you slip on purpose to meet people?",
+      "crushMessage": "be honest. did you do that on purpose to meet people?",
       "answers": [
-        { "words": ["it", "was", "an", "accident"], "tone": "chill", "reply": "lol sure. a very convenient accident." },
+        { "words": ["it", "was", "an", "accident"], "tone": "chill", "reply": "just remember to walk where ur going next time :>." },
         { "words": ["worth", "it", "though", "right"], "tone": "flirty", "reply": "...ok that was smooth. annoyingly smooth." },
-        { "words": ["falling", "is", "my", "love", "language"], "tone": "unhinged", "reply": "that's the saddest love language. i love it." }
+        { "words": ["falling", "is", "my", "love", "language"], "tone": "unhinged", "reply": "that's the saddest love language... " }
       ],
       "badWords": ["sorry", "lol", "u up?", "my bad", "haha", "k", "um", "on purpose"],
       "patterns": ["rain"],
@@ -53,7 +53,7 @@
       "timeLimit": 25,
       "failReplies": ["lol what", "you good?", "that was a lot of words for one text"],
       "deathPhrases": [
-        { "phrase": "it was on purpose", "reply": "ON PURPOSE?! you flattened me on PURPOSE?? 😭" }
+        { "phrase": "it was on purpose", "reply": "ON PURPOSE?! you flattened me on PURPOSE?? D;" }
       ]
     },
     {
@@ -70,9 +70,9 @@
       "patterns": ["rain"],
       "bulletSpeed": 1.45,
       "timeLimit": 25,
-      "failReplies": ["my phone auto-corrected you to 'nervous'", "i'm going to pretend i didn't read that", "seen 11:42pm"],
+      "failReplies": ["i'm going to pretend i didn't read that", "seen 11:42pm"],
       "deathPhrases": [
-        { "phrase": "head over heels", "reply": "head over heels?? we've known each other for one corridor 😳" }
+        { "phrase": "head over heels", "reply": "head over heels?? we've known each other for like 5 seconds" }
       ]
     },
     {
