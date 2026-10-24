@@ -88,6 +88,7 @@ const Game = {
     this.introCue = 0;
     this.flash = 0;
     this.kick = 0;
+    Notifs.start(this.level); // group chat banners (if this level has them)
   },
 
   // ----- Level intro (typing indicator) -----
@@ -128,6 +129,7 @@ const Game = {
   updateFx(dt) {
     this.flash = Math.max(0, this.flash - dt / GAME_CONFIG.fx.flashTime);
     this.kick = Math.max(0, this.kick - dt / GAME_CONFIG.fx.kickTime);
+    Notifs.animate(dt);
   },
 
   kickOffset() {
@@ -202,6 +204,7 @@ const Game = {
     this.updatePattern(dt);
 
     Anxiety.update(dt);
+    Notifs.update(dt);
     this.updateBullets(dt);
     this.syncGoods(dt);
     this.updateGoods(dt);
@@ -456,6 +459,7 @@ const Game = {
       Chat.chip('good', g.text, g.x, g.y, g.w, g.h, { glow });
     }
     for (const b of this.bullets) Chat.chip('bad', b.text, b.x, b.y, b.w, b.h);
+    Notifs.draw(); // banners hide bullets and words, but never the player
     this.drawPlayer();
     ctx.restore();
   },

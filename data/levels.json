@@ -13,6 +13,7 @@
       "patterns": ["rain"],
       "bulletSpeed": 1.0,
       "timeLimit": 25,
+      "notificationsEnabled": false,
       "failReplies": ["seen 9:41pm", "...who is this", "ok. i'm pretending that was a typo"],
       "deathPhrases": [
         { "phrase": "that was meow", "reply": "...did you just meow at me??" }
@@ -32,6 +33,15 @@
       "patterns": ["rain", "aimed"],
       "bulletSpeed": 1.15,
       "timeLimit": 25,
+      "notificationsEnabled": true,
+      "notificationRate": 4,
+      "notifications": [
+        { "sender": "Zig", "text": "WAIT is that CLOVER on ur screen 👀" },
+        { "sender": "Jun Hao", "text": "bro is texting a girl. report to the group chat" },
+        { "sender": "Aisyah", "text": "update us pls. we are all here" },
+        { "sender": "Canvas", "text": "New assignment: Math Test Revision (due Fri 11:59pm)" },
+        { "sender": "Shopee", "text": "9.9 Sale! Slippers up to 50% off 🔥" }
+      ],
       "failReplies": ["...are you ok", "typing... typing... never mind", "i'm gonna go look at a wall now"],
       "deathPhrases": [
         { "phrase": "i collect bunnies", "reply": "...thats not creepy at all" }
@@ -51,6 +61,15 @@
       "patterns": ["aimed", "wall"],
       "bulletSpeed": 1.3,
       "timeLimit": 25,
+      "notificationsEnabled": true,
+      "notificationRate": 7,
+      "notifications": [
+        { "sender": "Zig", "text": "she's TEASING u?? that's GOOD sia" },
+        { "sender": "Aisyah", "text": "DID U TEXT HER YET" },
+        { "sender": "Jun Hao", "text": "bro is typing for 10 mins 💀" },
+        { "sender": "Shopee", "text": "Your cart misses you: Fluffy Bunny Slides 🐰" },
+        { "sender": "Canvas", "text": "Reminder: Chem lab report due tomorrow" }
+      ],
       "failReplies": ["lol what", "you good?", "that was a lot of words for one text"],
       "deathPhrases": [
         { "phrase": "it was on purpose", "reply": "ON PURPOSE?! you flattened me on PURPOSE?? D;" }
@@ -70,6 +89,15 @@
       "patterns": ["rain", "spiral", "wall"],
       "bulletSpeed": 1.45,
       "timeLimit": 25,
+      "notificationsEnabled": true,
+      "notificationRate": 10,
+      "notifications": [
+        { "sender": "Zig", "text": "just say u love her lol" },
+        { "sender": "Jun Hao", "text": "ask her to the dance already. we believe in u" },
+        { "sender": "Aisyah", "text": "pls don't slip this time 🙏" },
+        { "sender": "Grab", "text": "Your GrabFood order is arriving 🍜" },
+        { "sender": "Canvas", "text": "New grade posted: Math Quiz 3" }
+      ],
       "failReplies": ["i'm going to pretend i didn't read that", "seen 11:42pm"],
       "deathPhrases": [
         { "phrase": "head over heels", "reply": "head over heels?? we've known each other for like 5 seconds" }
@@ -89,6 +117,15 @@
       "patterns": ["rain", "aimed", "spiral", "wall"],
       "bulletSpeed": 1.6,
       "timeLimit": 25,
+      "notificationsEnabled": true,
+      "notificationRate": 13,
+      "notifications": [
+        { "sender": "Zig", "text": "THIS IS THE MOMENT. ASK HER OUT" },
+        { "sender": "Jun Hao", "text": "if u slip now i'm leaving the group chat" },
+        { "sender": "Aisyah", "text": "she's typing... SHE'S TYPING" },
+        { "sender": "Shopee", "text": "Flash deal: non-slip insoles 80% off ⏰" },
+        { "sender": "Canvas", "text": "Due in 1 hour: Literature essay" }
+      ],
       "failReplies": ["...i need a minute", "i'm laughing but also a little scared", "seen 11:42pm (typing...)"],
       "deathPhrases": [
         { "phrase": "walk with me to the altar", "reply": "...the ALTAR?? slow down, Finn!! 😳" }

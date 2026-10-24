@@ -34,6 +34,16 @@
         { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "she didn't block you. that's a WIN.", "effect": "bounce" },
         { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "she's typing again. oh no. oh no no no." }
       ],
+      "next": "scene:group_chat"
+    },
+    "group_chat": {
+      "background": "bg_bedroom.png",
+      "lines": [
+        { "text": "buzz. buzz. buzz. the group chat \"2E3 Slide Squad\" has found out." },
+        { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "ok i may have told them. only a little." },
+        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "my phone won't STOP buzzing!!", "effect": "shake" },
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "ok. i can swipe them away. click them, or press Q. i can multitask." }
+      ],
       "next": "level:smalltalk"
     },
     "fail_apology": {

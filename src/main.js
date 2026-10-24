@@ -70,10 +70,23 @@ window.addEventListener('keydown', (e) => {
 });
 window.addEventListener('keyup', (e) => input.keys.delete(e.code));
 window.addEventListener('blur', () => input.keys.clear());
+// Mouse position in logical (450x800) coordinates, however the page is scaled.
+function logicalPoint(e) {
+  const r = canvas.getBoundingClientRect();
+  return [(e.clientX - r.left) * CONFIG.width / r.width, (e.clientY - r.top) * CONFIG.height / r.height];
+}
+window.addEventListener('mousemove', (e) => {
+  if (current && current.onPointerMove) current.onPointerMove(...logicalPoint(e));
+});
+window.addEventListener('mouseup', (e) => {
+  if (current && current.onPointerUp) current.onPointerUp(...logicalPoint(e));
+});
 canvas.addEventListener('mousedown', (e) => {
   Sfx.unlock();
   if (!current) return;
-  if (current.onClick) {
+  if (current.onPointerDown) {
+    current.onPointerDown(...logicalPoint(e)); // screens that need drag/click control (the level)
+  } else if (current.onClick) {
     // Logical (450x800) coordinates, regardless of how the page is scaled.
     const r = canvas.getBoundingClientRect();
     current.onClick((e.clientX - r.left) * CONFIG.width / r.width, (e.clientY - r.top) * CONFIG.height / r.height);
@@ -197,9 +210,20 @@ const states = {
       Game.updateFx(dt);
       if (Game.finished()) this.send();
     },
-    // Space/click while she is "typing" skips straight to the bullets.
+    // Space while she is "typing" skips straight to the bullets.
     onConfirm() {
       Game.skipIntro();
+    },
+    // Mouse: grab/click a notification banner, otherwise a click skips the typing wait.
+    onPointerDown(x, y) {
+      if (Game.introDone() && !Game.finished() && Notifs.pointerDown(x, y)) return;
+      Game.skipIntro();
+    },
+    onPointerMove(x, y) { Notifs.pointerMove(x, y); },
+    onPointerUp(x, y) { Notifs.pointerUp(x, y); },
+    // Q dismisses the newest notification banner (so keyboard players can keep moving).
+    onKey(code) {
+      if (code === 'KeyQ' && !Game.finished()) Notifs.dismissNewest();
     },
     // Locks in the bar as the sent message and picks the crush's reaction from Game.endReason.
     // Passing = sentence completed with satisfaction left (even with mistakes in the message).
@@ -437,6 +461,7 @@ Promise.all([
   Sfx.setManifest(sfx);
   levelData.levels = data.levels;
   DeathPhrase.validate(levelData.levels); // console.warns any unfair or unreachable death phrase
+  Notifs.validate(levelData.levels);      // console.warns notifications without messages or a rate
   for (const l of levelData.levels) {
     for (const name of l.patterns) if (!Patterns[name]) console.warn(`level "${l.id}": unknown pattern "${name}"`);
   }
@@ -444,7 +469,8 @@ Promise.all([
   if (story) Story.setData(story);
   else console.warn('data/story.json missing or invalid: story scenes are skipped');
   Story.validate(levelData.levels); // console.warns broken scene links
-  return Assets.loadAll(Story.assetNames()); // backgrounds + story sprites (missing ones become placeholders)
+  // backgrounds, story sprites, notification banner + avatars (missing ones become placeholders)
+  return Assets.loadAll([...Story.assetNames(), ...Notifs.assetNames(levelData.levels)]);
 }).then(() => {
   setState('title');
   requestAnimationFrame(frame);

@@ -156,6 +156,11 @@ const Sfx = {
       this.tone(t, 260 * r, 640 * r, 0.12, { vol: 0.2 * v });
       this.tone(t, 640 * r, 340 * r, 0.16, { vol: 0.2 * v, delay: 0.1 });
     },
+    buzz(t, r, v)    {                                                                                                    // phone vibrating: two quick pulses
+      this.tone(t, 150 * r, 135 * r, 0.12, { type: 'sawtooth', vol: 0.16 * v });
+      this.tone(t, 150 * r, 135 * r, 0.12, { type: 'sawtooth', vol: 0.16 * v, delay: 0.16 });
+    },
+    swipe(t, r, v)   { this.burst(t, 700 * r, 3200 * r, 0.16, { vol: 0.22 * v, q: 1.1 }); },                              // notification swiped away
     swish(t, r, v)   { this.burst(t, 500 * r, 2500 * r, 0.22, { vol: 0.16 * v, q: 1.5 }); },                              // story: slideIn
   },
 };

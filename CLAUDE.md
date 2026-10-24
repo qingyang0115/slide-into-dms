@@ -4,13 +4,14 @@ Game jam entry. Theme: **"slide"**. Time limit: **1.5 days**. Scope ruthlessly.
 
 ## Concept
 
-**Everyone is a slide (a slipper)** in a high school romance. The player is a nervous, clumsy slipper trying to slide into their crush's DMs. Replying is a **bullet hell minigame** inside a phone screen: collect the right words in order, dodge the cringe ones. Whatever you collect gets sent, so mistakes produce a garbled, embarrassing message and the crush reacts to it. Two separate meters track how it's going: the crush's **satisfaction** (health) and the player's **anxiety** (difficulty).
+**Everyone is a slide (a slipper)** in a high school romance. The player is a nervous, clumsy slipper trying to slide into their crush's DMs. Replying is a **bullet hell minigame** inside a phone screen: collect the right words in order, dodge the cringe ones. Whatever you collect gets sent, so mistakes produce a garbled, embarrassing message and the crush reacts to it. Two separate meters track how it's going: the crush's **satisfaction** (health) and the player's **anxiety** (difficulty). From level 2 on, his friends' **group chat sabotage** him: notifications slide in and cover the play area.
 
 ## Story & characters
 
 - **Finn** (protagonist, he/him): a clumsy **fish slipper** who is always slipping. His clumsiness is the core joke: just as he slips in real life, he "slips" in his texts.
 - **Clover** (crush, she/her): a **bunny slipper** girl at the same school, with long wobbly ears.
 - **Zig** (best friend, optional): **striped slippers**, the hype man in story scenes. Written without pronouns.
+- **The group chat** ("2E3 Slide Squad"): Zig plus two more friends, **Jun Hao** and **Aisyah**, who only exist as notification senders. Besides friends, notifications can be random school/Singapore-flavoured app pings (Canvas assignments, Shopee deals, Grab).
 
 **Setup:** in a freshly mopped corridor Finn rushes, slips, and crashes into Clover (a classic anime meet-cute, but with slides). She walks off. That night he decides to text her an apology. Over the five levels the apology slowly turns into flirting.
 
@@ -41,6 +42,7 @@ Story scenes are visual-novel style: character sprites on a background, speech b
    - **Target words** drift/slide around. Touching the *next correct word* adds it to the reply bar.
    - **Bad words** ("u up?", "lol", "k", "sorry", "😳") fire in bullet patterns. Touching one **inserts it into the message**, **lowers crush satisfaction**, and **raises anxiety**. It never ends the level on its own.
    - Touching a correct word out of order is a **smaller mistake**: it is inserted in the wrong place and costs less satisfaction than a bad word.
+   - **Group chat notifications** (levels that enable them) slide in over the play area and hide what's underneath. Dismiss them while dodging (see "Group chat sabotage").
 3. **Two meters** run during the phase (see "Meters" below). Satisfaction is the health bar. Anxiety is the difficulty driver and can never make you lose.
 4. **Send:** the message auto-sends as soon as any of these happens:
    - the sentence is complete,
@@ -67,6 +69,19 @@ Story scenes are visual-novel style: character sprites on a background, speech b
 - Rises steadily over time during the bullet phase, on bad-word hits, and slightly on **near-misses** (a bad word passing within a small radius of the player without touching).
 - Drops a little each time a correct word is collected.
 - All rates (time rise, hit rise, near-miss rise, near-miss radius, correct-word drop) live in `ANXIETY_CONFIG`.
+
+## Group chat sabotage
+
+During the bullet phase his friends' group chat keeps buzzing. Notification banners **slide in** (from the top, left or right edge of the play area), **stay**, and hide whatever is underneath. He has to **slide them away** while still dodging and collecting. It fits the theme: everything here slides.
+
+- **Banners are harmless:** they never damage the player and never block collisions or word pickups. Bullets and words keep moving and hitting underneath. The danger is **not seeing** incoming bad words. The player's own heart is always drawn on top of banners so you can always see yourself.
+- **Dismiss:** with the mouse, **drag/swipe** the banner away (past ~60px it flies off in the swipe direction; a shorter drag springs back) or just **click** it. With the keyboard, press **Q** to dismiss the **most recent** banner, so keyboard-only players can handle them while moving. A dismissed banner whooshes off screen.
+- **Anxiety:** every banner left on screen slowly raises anxiety (per banner, per second). Dismissing one gives a small anxiety drop. This makes ignoring them costly without making them deadly.
+- **Cap:** at most `maxOnScreen` banners (default 3) at once, placed so they don't overlap when there's room, so the play area is never fully blocked. New ones wait until there's a free slot.
+- **Feel:** a phone-buzz sound when one arrives, a slide-in animation, and a quick whoosh when it's swiped away.
+- **Content:** each banner has a sender and a text. Friends hype or tease him ("DID U TEXT HER YET", "bro is typing for 10 mins 💀", "just say u love her lol"), or it's a random app ping (Canvas assignment, Shopee 9.9 sale, Grab). Messages should fit the level's story moment, be light Singlish at most, and stay school-appropriate and affectionate.
+- **Pacing:** level 1 has none (learn the basics first). Level 2 introduces them at a low rate, and later levels ramp up. A story beat before level 2 explains why his phone is blowing up.
+- **Tuning:** all timing and anxiety numbers live in `NOTIF_CONFIG` (`notifications.js`): slide-in time, max on screen, first-banner delay, anxiety per second per banner, anxiety drop on dismiss, swipe distance. Per-level frequency is `notificationRate` in `levels.json`.
 
 ## Death phrases
 
@@ -99,7 +114,7 @@ Levels must offer enough of each tone for every ending to be reachable (flirty a
 - **Chip pop:** words pop (grow then settle) when they land in the reply bar.
 - **Send whoosh:** when the message sends, a bright band sweeps across the reply bar with a whoosh before the result screen (`CONFIG.send`).
 - **Screen transitions:** every screen change slides the new screen in from the right while the old one slides out (`CONFIG.transition`). It's a game about slides.
-- **Sound effects** are synthesized in code (`audio.js`), so the game has sound with no files: `click`, `tick` (story typewriter), `type` (typing dots), `pop`, `collect` (pitch climbs as the sentence builds), `wrong`, `hit`, `warn` (death phrase telegraph), `whoosh`, `win`, `fail`, `boom` (death phrase slam), `thud` / `boing` / `swish` (story shake / bounce / slideIn). To use a real recording, put the file in `assets/sfx/` and map the effect name to it in `data/sfx.json`, e.g. `{ "hit": "hit.wav" }`; effects without an entry keep the synthesized sound. Browsers only allow audio after a key press or click, so sound starts after the first input. **M** toggles mute (remembered).
+- **Sound effects** are synthesized in code (`audio.js`), so the game has sound with no files: `click`, `tick` (story typewriter), `type` (typing dots), `pop`, `collect` (pitch climbs as the sentence builds), `wrong`, `hit`, `warn` (death phrase telegraph), `whoosh`, `win`, `fail`, `boom` (death phrase slam), `thud` / `boing` / `swish` (story shake / bounce / slideIn), `buzz` (a notification arrives), `swipe` (a notification is dismissed). To use a real recording, put the file in `assets/sfx/` and map the effect name to it in `data/sfx.json`, e.g. `{ "hit": "hit.wav" }`; effects without an entry keep the synthesized sound. Browsers only allow audio after a key press or click, so sound starts after the first input. **M** toggles mute (remembered).
 
 ## Tech stack
 
@@ -124,6 +139,7 @@ src/
   anxiety.js     # anxiety meter (difficulty) + its effects
   satisfaction.js # crush satisfaction meter (health) + crush face
   deathphrase.js # death phrase matching, telegraph check, level validation
+  notifications.js # group chat sabotage: notification banners, dismissing, anxiety
   assets.js      # asset loading with placeholder fallback
   audio.js       # sound effects (synthesized with WebAudio, optional real files)
 data/
@@ -155,6 +171,8 @@ assets/
 | `bubble_crush.png`, `bubble_player.png` | Chat bubbles (9-slice if possible) | stretchable |
 | `chip_good.png`, `chip_bad.png` | Word bullet backgrounds (text drawn on top in code) | stretchable |
 | `fx_sweat_vignette.png` | High-anxiety overlay | full screen |
+| `notif_banner.png` | Group chat notification banner background. Stretchable; **keep the centre plain**, the sender and message text are drawn in code on top | 360×80 (720×160 export) |
+| `notif_avatar_<sender>.png` (optional), e.g. `notif_avatar_zig.png`, `notif_avatar_junhao.png`, `notif_avatar_aisyah.png`, `notif_avatar_canvas.png`, `notif_avatar_shopee.png`, `notif_avatar_grab.png` | Sender avatar on a banner. `<sender>` is the sender name lowercased with spaces removed. Missing ones show a labeled placeholder | 40×40 (80×80 export) |
 | `screen_title.png`, `screen_gameover.png`, `screen_ending.png` | Menus | full screen |
 | `bg_bedroom.png`, `bg_classroom.png`, `bg_corridor.png` | Story scene backgrounds: Finn's bedroom, the classroom, and the freshly mopped school corridor where the crash happens | full screen (900×1600 export) |
 | `story_player_<expression>_sheet.png` | Finn's story sprite (fish slipper), e.g. `story_player_nervous_sheet.png` | ~200×300 per frame |
@@ -206,6 +224,11 @@ All content is data. Adding a level must never require code changes.
 - `patterns`: names from `patterns.js`, cycled through during the level.
 - `deathPhrases` (optional, exactly one per shipped level): `phrase` is what the bar reads as when it triggers, `reply` is the crush's special reaction. Each must need at least one bad word (e.g. "i'll beg" = good "i'll", good "be", bad "g"). See "Death phrases".
 - `failReplies`: generic fail reactions (satisfaction empty, timeout).
+- Group chat sabotage (all optional; a level with none of them has no notifications):
+  - `notificationsEnabled`: `true` / `false`. Set `false` to switch them off even if a list is present (level 1 does this).
+  - `notificationRate`: banners **per minute** (e.g. `8` is one every ~7.5s on average, with some randomness). The first banner waits `NOTIF_CONFIG.firstDelay` seconds into the bullet phase.
+  - `notifications`: the messages for this level, picked in a shuffled order, e.g. `[{ "sender": "Zig", "text": "DID U TEXT HER YET" }, { "sender": "Shopee", "text": "9.9 Sale! Slippers 50% off" }]`. Sender names also pick the avatar file (`notif_avatar_zig.png`).
+  - On load the game warns if a level has notifications enabled but no messages or no rate.
 - Difficulty ramps through the level data (`bulletSpeed`, `timeLimit`, more `badWords`), not code.
 
 ## Story data format (`data/story.json`)
@@ -241,6 +264,7 @@ All dialogue is data. Rewriting the story must never require code changes.
 - On load the game warns in the console about unknown targets, bad positions/effects and empty scenes. `data/story.json` is optional: without it, scenes are skipped.
 - `effect` (optional): `shake`, `bounce`, `slideIn`, `fadeIn`.
 - Typewriter text; click/Space finishes the line instantly, a second press advances. Add a small "skip scene" button.
+- The group chat is introduced in a short beat before level 2 (`group_chat`): his friends find out he's texting her and his phone starts blowing up, with a hint that notifications can be swiped away (click, or Q).
 - Keep the whole story short: **intro (~6–10 lines), 1–3 lines between levels, ending (~5 lines)**. The bullet hell is the main game.
 
 ## Bullet patterns (keep to 3–4)
@@ -265,6 +289,8 @@ Make one pattern feel good before adding the next.
 7. Remaining patterns (`aimed`, `spiral`, `wall`). (Branching answers/tones and the tone-based ending pick are already in.)
 8. Juice: typing indicator, hit flash, send whoosh, screen shake, sound effects, transitions between story and gameplay.
 9. Title screen, game over + retry, ending screen. Prepare the itch.io zip.
+
+**Extra mechanic (added after step 8):** group chat sabotage (notification banners), described above.
 
 **Stretch only if everything above is done:** a bonus "pass the note in class" level, touch controls.
 
