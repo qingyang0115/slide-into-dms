@@ -4,13 +4,13 @@
 
 const ANXIETY_CONFIG = {
   max: 100,
-  timeRise: 3.0,        // anxiety per second during the bullet phase
+  timeRise: 5.0,        // anxiety per second during the bullet phase
   hitRise: 10,          // touched a bad word
   misplacedRise: 6,     // touched a correct word out of order
   nearMissRise: 3,      // a bad word passed close without touching
   nearMissRadius: 28,   // px from the player's centre to the chip's hitbox edge
   correctDrop: 6,       // collecting a correct word calms you down
-  speedBoost: 0.6,   // bullets are up to +60% faster at max anxiety
+  speedBoost: 0.7,   // bullets are up to +60% faster at max anxiety
   shake: { start: 0.5, maxPx: 5 },        // screen shake begins at 50% anxiety
   wobble: { start: 0.35, maxPx: 3 },      // text wobble begins at 35%
   vignette: { start: 0.3, maxAlpha: 0.85 },

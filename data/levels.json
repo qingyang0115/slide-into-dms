@@ -37,10 +37,10 @@
       "notificationRate": 4,
       "notifications": [
         { "sender": "Zig", "text": "WAIT is that CLOVER on ur screen 👀" },
-        { "sender": "Jun Hao", "text": "bro is texting a girl. report to the group chat" },
-        { "sender": "Aisyah", "text": "update us pls. we are all here" },
-        { "sender": "Canvas", "text": "New assignment: Math Test Revision (due Fri 11:59pm)" },
-        { "sender": "Shopee", "text": "9.9 Sale! Slippers up to 50% off 🔥" }
+        { "sender": "Kroks", "text": "bro is texting a girl. report to the group chat" },
+        { "sender": "Birkeny", "text": "update us pls. we are all here" },
+        { "sender": "Kanbos", "text": "New assignment: Math Tutorial (due Fri 11:59pm)" },
+        { "sender": "Shupee", "text": "9.9 Sale! Slippers up to 50% off 🔥" }
       ],
       "failReplies": ["...are you ok", "typing... typing... never mind", "i'm gonna go look at a wall now"],
       "deathPhrases": [
@@ -53,7 +53,7 @@
       "afterFail": "scene:fail_teasing",
       "crushMessage": "be honest. did you do that on purpose to meet people?",
       "answers": [
-        { "words": ["it", "was", "an", "accident"], "tone": "chill", "reply": "just remember to walk where ur going next time :>." },
+        { "words": ["it", "was", "an", "accident"], "tone": "chill", "reply": "just remember to watch where ur going next time :>." },
         { "words": ["worth", "it", "though", "right"], "tone": "flirty", "reply": "...ok that was smooth. annoyingly smooth." },
         { "words": ["falling", "is", "my", "love", "language"], "tone": "unhinged", "reply": "that's the saddest love language... " }
       ],
@@ -64,11 +64,11 @@
       "notificationsEnabled": true,
       "notificationRate": 7,
       "notifications": [
-        { "sender": "Zig", "text": "she's TEASING u?? that's GOOD sia" },
-        { "sender": "Aisyah", "text": "DID U TEXT HER YET" },
-        { "sender": "Jun Hao", "text": "bro is typing for 10 mins 💀" },
-        { "sender": "Shopee", "text": "Your cart misses you: Fluffy Bunny Slides 🐰" },
-        { "sender": "Canvas", "text": "Reminder: Chem lab report due tomorrow" }
+        { "sender": "Zig", "text": "she's TEASING u?? that's GOOD" },
+        { "sender": "Kroks", "text": "DID U TEXT HER YET" },
+        { "sender": "Birkeny", "text": "bro is typing for 10 mins 💀" },
+        { "sender": "Shupee", "text": "Your cart misses you: Fluffy Bunny Slides 🐰" },
+        { "sender": "Kanbos", "text": "Reminder: Chem lab report due tomorrow" }
       ],
       "failReplies": ["lol what", "you good?", "that was a lot of words for one text"],
       "deathPhrases": [
@@ -93,10 +93,10 @@
       "notificationRate": 10,
       "notifications": [
         { "sender": "Zig", "text": "just say u love her lol" },
-        { "sender": "Jun Hao", "text": "ask her to the dance already. we believe in u" },
-        { "sender": "Aisyah", "text": "pls don't slip this time 🙏" },
-        { "sender": "Grab", "text": "Your GrabFood order is arriving 🍜" },
-        { "sender": "Canvas", "text": "New grade posted: Math Quiz 3" }
+        { "sender": "Kroks", "text": "ask her to the dance already. we believe in u" },
+        { "sender": "Birkeny", "text": "pls don't slip this time 🙏" },
+        { "sender": "Glab", "text": "Your GlabFood order is arriving 🍜" },
+        { "sender": "Kanbos", "text": "New grade posted: Math Quiz 3" }
       ],
       "failReplies": ["i'm going to pretend i didn't read that", "seen 11:42pm"],
       "deathPhrases": [
@@ -121,10 +121,10 @@
       "notificationRate": 13,
       "notifications": [
         { "sender": "Zig", "text": "THIS IS THE MOMENT. ASK HER OUT" },
-        { "sender": "Jun Hao", "text": "if u slip now i'm leaving the group chat" },
-        { "sender": "Aisyah", "text": "she's typing... SHE'S TYPING" },
-        { "sender": "Shopee", "text": "Flash deal: non-slip insoles 80% off ⏰" },
-        { "sender": "Canvas", "text": "Due in 1 hour: Literature essay" }
+        { "sender": "Kroks", "text": "if u slip now i'm leaving the group chat" },
+        { "sender": "Birkeny", "text": "she's typing... SHE'S TYPING" },
+        { "sender": "Shupee", "text": "Flash deal: CLICK TO FIND OUT ⏰" },
+        { "sender": "Kanbos", "text": "Due in 1 hour: General Paper essay" }
       ],
       "failReplies": ["...i need a minute", "i'm laughing but also a little scared", "seen 11:42pm (typing...)"],
       "deathPhrases": [
