@@ -15,6 +15,13 @@ const PRELOAD = [
   'bubble_crush.png',
   'bubble_player.png',
   'char_crush_neutral.png',
+  'char_crush_amused.png',
+  'char_crush_unimpressed.png',
+  'char_player_idle.png',
+  'char_player_sweat.png',
+  'char_player_panic.png',
+  'char_player_happy.png',
+  'fx_sweat_vignette.png',
   'screen_title.png',
   'screen_gameover.png',
   'screen_ending.png',
@@ -123,8 +130,14 @@ const states = {
     },
     draw() {
       drawFullscreen('bg_phone.png');
+      // Anxiety shakes everything on the phone except the backdrop and the vignette.
+      ctx.save();
+      const [sx, sy] = Anxiety.shakeOffset();
+      ctx.translate(sx, sy);
       Chat.draw(Game.level.crushMessage, Game.entries);
       Game.draw();
+      ctx.restore();
+      Anxiety.drawVignette();
       drawCenteredText(`level ${progress.levelIndex + 1}/${levelData.levels.length}   move: WASD/arrows, slow: Shift`, 772, 12, '#eee');
     },
   },
@@ -145,6 +158,7 @@ const states = {
       drawFullscreen('bg_phone.png');
       Chat.drawCrushMessage(Game.level.crushMessage);
       Chat.drawReplyBar(r.entries, '(you sent nothing...)');
+      Chat.drawPlayerAvatar(r.success ? 'happy' : 'panic');
       if (!this.replyShown()) return;
       Chat.drawCrushMessage(r.reply, r.success ? 'amused' : 'unimpressed', 270);
       drawCenteredText('press Space / click', 600, 16, '#ffd');

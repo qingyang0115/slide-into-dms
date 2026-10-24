@@ -36,6 +36,7 @@ const Game = {
   next: 0,          // index of the next word needed in the locked answer
   done: false,      // sentence completed
   timedOut: false,  // timer ran out
+  panicked: false,  // anxiety maxed out
   timeLeft: 0,
   hits: 0,
   time: 0,
@@ -55,6 +56,8 @@ const Game = {
     this.next = 0;
     this.done = false;
     this.timedOut = false;
+    this.panicked = false;
+    Anxiety.reset();
     this.timeLeft = this.level.timeLimit;
     this.hits = 0;
     this.time = 0;
@@ -65,9 +68,9 @@ const Game = {
 
   // ----- Result (read by main.js when the level ends) -----
 
-  // Level is over: sentence complete, or time ran out (sends whatever is in the bar).
+  // Level is over: sentence complete, time ran out, or anxiety maxed (sends whatever is in the bar).
   finished() {
-    return this.done || this.timedOut;
+    return this.done || this.timedOut || this.panicked;
   },
 
   message() {
@@ -121,9 +124,11 @@ const Game = {
       p.update(this, dt, (this.patternState[name] = this.patternState[name] || {}));
     }
 
+    Anxiety.update(dt);
     this.updateBullets(dt);
     this.syncGoods(dt);
     this.updateGoods(dt);
+    if (!this.done && Anxiety.maxed()) this.panicked = true;
   },
 
   updatePlayer(dt) {
@@ -153,11 +158,12 @@ const Game = {
   updateBullets(dt) {
     const p = this.player;
     const a = this.area;
+    const speed = Anxiety.speedMultiplier(); // higher anxiety = faster bullets
 
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const b = this.bullets[i];
-      b.x += b.vx * dt;
-      b.y += b.vy * dt;
+      b.x += b.vx * dt * speed;
+      b.y += b.vy * dt * speed;
 
       // Despawn once fully outside the play area (with a margin).
       const m = 60;
@@ -183,9 +189,10 @@ const Game = {
     return dx * dx + dy * dy <= r * r;
   },
 
-  // Bad word touched: it gets inserted into the message. (Step 5 adds anxiety here.)
+  // Bad word touched: it gets inserted into the message and spikes anxiety.
   onBadHit(b) {
     this.hits++;
+    Anxiety.add(ANXIETY_CONFIG.badHit);
     this.entries.push({ text: b.text, kind: 'bad' });
     this.player.invuln = GAME_CONFIG.hitInvulnTime;
   },
@@ -275,6 +282,7 @@ const Game = {
         // Right word, wrong time: it lands in the message anyway. It respawns so the
         // sentence can still be finished (but the message is now garbled).
         this.entries.push({ text: g.text, kind: 'misplaced' });
+        Anxiety.add(ANXIETY_CONFIG.misplacedHit);
         p.invuln = GAME_CONFIG.hitInvulnTime;
         this.goods.splice(i, 1);
       }
@@ -283,6 +291,7 @@ const Game = {
 
   collectGood(g) {
     this.entries.push({ text: g.text, kind: 'good' });
+    Anxiety.add(-ANXIETY_CONFIG.goodRelief);
     if (this.locked === null) {
       this.locked = g.answer; // first word picks which sentence we're building
       this.next = 1;
