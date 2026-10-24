@@ -14,7 +14,7 @@ const ANXIETY_CONFIG = {
   shake: { start: 0.5, maxPx: 5 },        // screen shake begins at 50% anxiety
   wobble: { start: 0.35, maxPx: 3 },      // text wobble begins at 35%
   vignette: { start: 0.3, maxAlpha: 0.85 },
-  face: { sweat: 0.33, panic: 0.66 },     // thresholds for the protagonist's face
+  face: { panic: 0.33 },                  // anxiety threshold for the protagonist's face
   meter: { x: 339, y: 228, w: 96, h: 10 },
 };
 
@@ -55,12 +55,9 @@ const Anxiety = {
     return this.ramp(ANXIETY_CONFIG.wobble.start) * ANXIETY_CONFIG.wobble.maxPx;
   },
 
-  // Which protagonist avatar to show: 'idle' | 'sweat' | 'panic'.
+  // Which protagonist avatar to show: 'idle' | 'panic'.
   face() {
-    const r = this.ratio();
-    if (r >= ANXIETY_CONFIG.face.panic) return 'panic';
-    if (r >= ANXIETY_CONFIG.face.sweat) return 'sweat';
-    return 'idle';
+    return this.ratio() >= ANXIETY_CONFIG.face.panic ? 'panic' : 'idle';
   },
 
   drawMeter() {

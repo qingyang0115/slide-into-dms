@@ -35,7 +35,6 @@ it will look softer than the rest. For crisper sprites, export frames at **400×
 ### 1. Seen in every playthrough (gameplay screen)
 | File | Export size (px) | What it is |
 |---|---|---|
-| `bg_phone.png` | 900×1600 | The phone/chat background behind every level and result screen. Keep the play area (x 30–870, y 560–1520 at 2×) calm so the word chips stay readable. |
 | `player_heart.png` | 48×48 | The little heart you steer during the bullet phase. Its hitbox is a tiny dot in the middle, so a simple readable shape works best. |
 | `chip_good.png` | about 120×56, stretches | Background of a correct word (green in the placeholder). The word is drawn on top by code; the whole image is stretched to fit the word, so avoid fine detail near the edges. |
 | `chip_bad.png` | about 120×56, stretches | Background of a bad word (red in the placeholder). Same stretching as above. |
@@ -43,19 +42,16 @@ it will look softer than the rest. For crisper sprites, export frames at **400×
 | `bubble_player.png` | about 626×300, stretches | Finn's reply bubble holding the collected words. Same note. |
 | `char_crush_amused.png` | 192×192 | Clover's avatar after a clean message (and the happy replies). |
 | `char_crush_unimpressed.png` | 192×192 | Clover's avatar when satisfaction drops and after a fail. |
-| `char_crush_suspicious.png` | 192×192 | Clover's avatar while the death-phrase warning flashes. |
-| `char_player_sweat.png` | 192×192 | Finn's avatar at medium anxiety. |
-| `char_player_panic.png` | 192×192 | Finn's avatar at high anxiety, and on the fail result screen. |
+| `char_player_panic.png` | 192×192 | Finn's avatar when anxiety is elevated and on the fail result screen. |
 | `char_player_happy.png` | 192×192 | Finn's avatar on the pass result screen. |
 | `fx_sweat_vignette.png` | 900×1600 | Full-screen overlay that fades in as anxiety rises (transparent in the middle, sweaty/dark at the edges). |
 
 ### 2. Story scenes
 | File | Export size (px) | What it is |
 |---|---|---|
-| `story_player_panic_sheet.png` | same as the other sheets | Finn panicking. Used in 9 scenes (intro, home, group chat, all 5 fail scenes, after courage). |
+| `story_player_slip_sheet.png` | same as the other sheets | Finn slipping/panicking. Used in 9 scenes (intro, home, group chat, all 5 fail scenes, after courage). |
 | `story_friend_unsure_sheet.png` | same | Zig, unsure. Used in the group chat beat and 4 fail scenes. |
-| `story_crush_amused_sheet.png` | same | Clover, amused. Used after small talk and in all 3 endings. |
-| `story_crush_surprised_sheet.png` | same | Clover, surprised. Used in the crash (intro) and the bad ending. |
+| `story_crush_amused_sheet.png` | same | Clover, amused; used after small talk, in all 3 endings, and for surprised reactions in the crash and bad ending. |
 | `story_player_happy_sheet.png` | same | Finn, happy. Used after courage and in the good and bad endings. |
 | `bg_classroom.png` | 900×1600 | Classroom background (after small talk, neutral ending). |
 | `bubble_speech.png` | about 820×340, stretches | Speech bubble for every story line (a rounded box; the name tag is drawn separately). |

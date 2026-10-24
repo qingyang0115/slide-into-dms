@@ -221,7 +221,7 @@ const Chat = {
   },
 
   // Live chat view during the bullet phase. Wobble and the protagonist's face follow anxiety;
-  // the crush's face follows satisfaction (or turns suspicious on a death phrase warning).
+  // the crush's face follows satisfaction; the reply bar flashes for a death phrase warning.
   // sendP (0..1) is the progress of the send whoosh once the message is on its way.
   draw(crushMessage, entries, sendP) {
     const wobble = Anxiety.wobbleAmp();

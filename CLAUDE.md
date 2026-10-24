@@ -89,7 +89,7 @@ Rare, coherent, **telegraphed** instant fails. A death phrase forms when individ
 
 - **Matching:** after every word is added to the bar, the assembled message and each death phrase are compared lowercased with all spaces (and `. , ! ? '`) removed, as a substring match. So "be at u up" matches "beat u up". On a match, the message sends immediately. A death phrase beats every other end condition that happens on the same word.
 - **Fairness:** every death phrase must require at least one bad word, so a correct answer can never trigger one (misplaced good words count as good words). On level load the game checks this and logs a `console.warn` if a phrase could be built from good words alone, would match a correct answer, or is unreachable even with the bad words.
-- **Telegraph:** if the bar is one word away from completing a death phrase, the reply bar flashes red and the crush switches to a suspicious face (`char_crush_suspicious.png`), so the player can see it coming and dodge.
+- **Telegraph:** if the bar is one word away from completing a death phrase, the reply bar flashes red so the player can see it coming and dodge.
 - **Fail screen:** show the sent message, then reveal what it reads as with a highlight (e.g. "be at u up" → **BEAT U UP**) and a slow zoom, then the crush's special reply. The reveal is the comedic payoff.
 - **Content rules:** each level has exactly one death phrase. Design the phrase first, then adjust that level's good and bad words so it is actually reachable. Keep phrases silly, never threatening or crude.
 
@@ -174,10 +174,10 @@ assets/
 
 | File | Use | Display size (approx) |
 |---|---|---|
-| `bg_phone.png` | Phone frame / chat background | full screen |
+| solid grey background | Gameplay and result screen background, drawn by code | full screen |
 | `player_heart.png` | Player sprite in bullet phase (a little sweating heart, not a slide) | 24×24 |
-| `char_player_idle.png`, `char_player_sweat.png`, `char_player_panic.png`, `char_player_happy.png` | Finn's avatar, a **fish slipper** (reactions switch by anxiety/result) | 96×96 |
-| `char_crush_neutral.png`, `char_crush_amused.png`, `char_crush_unimpressed.png`, `char_crush_suspicious.png` | Clover's avatar, a **bunny slipper** with long ears (`suspicious` = death phrase telegraph) | 96×96 (192×192 file at 2×) |
+| `char_player_idle.png`, `char_player_panic.png`, `char_player_happy.png` | Finn's avatar, a **fish slipper** (reactions switch by anxiety/result) | 96×96 |
+| `char_crush_neutral.png`, `char_crush_amused.png`, `char_crush_unimpressed.png` | Clover's avatar, a **bunny slipper** with long ears | 96×96 (192×192 file at 2×) |
 | `bubble_crush.png`, `bubble_player.png` | Chat bubbles (9-slice if possible) | stretchable |
 | `chip_good.png`, `chip_bad.png` | Word bullet backgrounds (text drawn on top in code) | stretchable |
 | `fx_sweat_vignette.png` | High-anxiety overlay | full screen |
@@ -203,7 +203,7 @@ assets/
 
 If an asset is added that isn't in this table, add it to the table.
 
-Story sprite sheets the current `story.json` uses (each needs an entry in `data/sprites.json`): `story_player_nervous_sheet.png`, `story_player_panic_sheet.png`, `story_player_happy_sheet.png`, `story_player_slip_sheet.png` (Finn mid-slip, used in the crash), `story_friend_hype_sheet.png`, `story_friend_unsure_sheet.png`, `story_crush_neutral_sheet.png`, `story_crush_amused_sheet.png`, `story_crush_surprised_sheet.png`.
+Story sprite sheets the current `story.json` uses (each needs an entry in `data/sprites.json`): `story_player_nervous_sheet.png`, `story_player_happy_sheet.png`, `story_player_slip_sheet.png`, `story_friend_hype_sheet.png`, `story_friend_unsure_sheet.png`, `story_crush_neutral_sheet.png`, `story_crush_amused_sheet.png`.
 
 ## Level data format (`data/levels.json`)
 
@@ -257,7 +257,7 @@ All dialogue is data. Rewriting the story must never require code changes.
       "background": "bg_corridor.png",
       "lines": [
         { "text": "8:58am, corridor B. Finn the fish slipper is almost late. the floor is freshly mopped." },
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "late late late late—", "effect": "bounce" },
+        { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "late late late late—", "effect": "bounce" },
         { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "WHOOOOA—", "effect": "shake" }
       ],
       "next": "scene:intro_home"

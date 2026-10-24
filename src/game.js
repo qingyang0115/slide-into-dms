@@ -150,9 +150,9 @@ const Game = {
     return this.endReason !== null;
   },
 
-  // Crush avatar: suspicious while a death phrase is one word away, otherwise follows satisfaction.
+  // The reply bar warning marks a near death phrase; the crush face still follows satisfaction.
   crushFace() {
-    return this.deathWarning ? 'suspicious' : Satisfaction.face();
+    return Satisfaction.face();
   },
 
   message() {

@@ -9,9 +9,9 @@
       "background": "bg_corridor.png",
       "lines": [
         { "text": "8:58am, corridor B. Finn the fish slipper is almost late. the floor is freshly mopped." },
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "late late late late—", "effect": "bounce" },
+        { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "late late late late—", "effect": "bounce" },
         { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "WHOOOOA—", "effect": "shake" },
-        { "speaker": "crush", "sprite": "story_crush_surprised_sheet.png", "position": "right", "text": "OOF!", "effect": "shake" },
+        { "speaker": "crush", "sprite": "story_crush_amused_sheet.png", "position": "right", "text": "OOF!", "effect": "shake" },
         { "speaker": "crush", "sprite": "story_crush_neutral_sheet.png", "position": "right", "text": "...watch where you're sliding." },
         { "text": "Clover the bunny slipper hops away. Finn stays on the floor for a while, is this love at first sight??" }
       ],
@@ -23,7 +23,7 @@
       "lines": [
         { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "ok. one apology text. ummm... i'm sweating" },
         { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "BRO just slide into her DMs. What's the worst that can happen?", "effect": "bounce" },
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "she's ALREADY typing?!", "effect": "shake" }
+        { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "she's ALREADY typing?!", "effect": "shake" }
       ],
       "next": "level:apology"
     },
@@ -41,7 +41,7 @@
       "lines": [
         { "text": "**buzz. buzz. buzz.**" },
         { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "right... i may have told the groupchat. only a little." },
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "my phone won't STOP buzzing!!", "effect": "shake" },
+        { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "my phone won't STOP buzzing!!", "effect": "shake" },
         { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "ummmm it's okay!! i can swipe them away. click them, or press Q. i can multitask." }
       ],
       "next": "level:smalltalk"
@@ -49,7 +49,7 @@
     "fail_apology": {
       "background": "bg_bedroom.png",
       "lines": [
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "i slipped on a TEXT. how do you even do that.", "effect": "shake" },
+        { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "i slipped on a TEXT. how do you even do that.", "effect": "shake" },
         { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "breathe. type it again. slower." }
       ],
       "next": "retry"
@@ -68,7 +68,7 @@
       "background": "bg_bedroom.png",
       "lines": [
         { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "that conversation was a slip 'n slide." },
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "she's typing. not typing. typing. NOT typing." },
+        { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "she's typing. not typing. typing. NOT typing." },
         { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "again! small talk is just talk. you can do this!!", "effect": "bounce" }
       ],
       "next": "retry"
@@ -86,7 +86,7 @@
     "fail_teasing": {
       "background": "bg_corridor.png",
       "lines": [
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "i can't believe i sent that. i just can't.", "effect": "shake" },
+        { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "i can't believe i sent that. i just can't.", "effect": "shake" },
         { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "you can. you did. now send something better." }
       ],
       "next": "retry"
@@ -97,7 +97,7 @@
       "lines": [
         { "speaker": "player", "sprite": "story_player_happy_sheet.png", "position": "left", "text": "she's going to the dance?! to THE dance?!", "effect": "bounce" },
         { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "ASK. HER. NOW." },
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "i'm sweating so much. is that normal." }
+        { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "i'm sweating so much. is that normal." }
       ],
       "next": "level:question"
     },
@@ -105,7 +105,7 @@
       "background": "bg_bedroom.png",
       "lines": [
         { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "ok. that was a complete disaster." },
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "why did i send that omggg why did i send that." },
+        { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "why did i send that omggg why did i send that." },
         { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "again. againn." }
       ],
       "next": "retry"
@@ -115,7 +115,7 @@
       "background": "bg_bedroom.png",
       "lines": [
         { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "...bro." },
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "...", "effect": "shake" },
+        { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "...", "effect": "shake" },
         { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "last try. don't slip." }
       ],
       "next": "retry"
@@ -149,7 +149,7 @@
         { "speaker": "player", "sprite": "story_player_happy_sheet.png", "position": "left", "text": "YES. watch this smooth exit.", "effect": "bounce" },
         { "text": "Finn spins dramatically. the floor is freshly mopped. again." },
         { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "WHOOOOA—", "effect": "shake" },
-        { "speaker": "crush", "sprite": "story_crush_surprised_sheet.png", "position": "right", "text": "FINN!!", "effect": "shake" },
+        { "speaker": "crush", "sprite": "story_crush_amused_sheet.png", "position": "right", "text": "FINN!!", "effect": "shake" },
         { "text": "crash number two. Clover was laughing too hard to help. true love needs traction." }
       ],
       "next": "end"

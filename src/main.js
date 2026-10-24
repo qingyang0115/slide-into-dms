@@ -17,7 +17,6 @@ const CONFIG = {
 
 // Every image the game may use. Missing ones become labeled placeholders.
 const PRELOAD = [
-  'bg_phone.png',
   'bubble_speech.png',
   'player_heart.png',
   'chip_bad.png',
@@ -27,9 +26,7 @@ const PRELOAD = [
   'char_crush_neutral.png',
   'char_crush_amused.png',
   'char_crush_unimpressed.png',
-  'char_crush_suspicious.png',
   'char_player_idle.png',
-  'char_player_sweat.png',
   'char_player_panic.png',
   'char_player_happy.png',
   'fx_sweat_vignette.png',
@@ -130,6 +127,11 @@ function drawCenteredText(text, y, size = 24, color = '#fff') {
 
 function drawFullscreen(name) {
   Assets.draw(ctx, name, 0, 0, CONFIG.width, CONFIG.height);
+}
+
+function drawPhoneBackground() {
+  ctx.fillStyle = '#808080';
+  ctx.fillRect(0, 0, CONFIG.width, CONFIG.height);
 }
 
 // ---------- Flow ----------
@@ -243,7 +245,7 @@ const states = {
       this.sendT = 0;
     },
     draw() {
-      drawFullscreen('bg_phone.png');
+      drawPhoneBackground();
       // Anxiety shakes everything on the phone except the backdrop and the vignette.
       ctx.save();
       const [sx, sy] = Anxiety.shakeOffset();
@@ -329,8 +331,8 @@ const states = {
     },
     draw() {
       const r = progress.lastResult;
-      drawFullscreen('bg_phone.png');
-      Chat.drawCrushMessage(Game.level.crushMessage, r.death ? 'suspicious' : 'neutral');
+      drawPhoneBackground();
+      Chat.drawCrushMessage(Game.level.crushMessage, r.death ? 'unimpressed' : 'neutral');
       Chat.drawReplyBar(r.entries, '(you sent nothing...)', 0, r.death ? 0.35 : 0);
       Chat.drawPlayerAvatar(r.success ? 'happy' : 'panic');
       if (r.death) this.drawReveal(r);
