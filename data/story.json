@@ -13,7 +13,7 @@
         { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "WHOOOOA—", "effect": "shake" },
         { "speaker": "crush", "sprite": "story_crush_surprised_sheet.png", "position": "right", "text": "OOF!", "effect": "shake" },
         { "speaker": "crush", "sprite": "story_crush_neutral_sheet.png", "position": "right", "text": "...watch where you're sliding." },
-        { "text": "Clover the bunny slipper hops away, ears still wobbling. Finn stays on the floor for a while." }
+        { "text": "Clover the bunny slipper hops away. Finn stays on the floor for a while, is this love at first sight??" }
       ],
       "next": "scene:intro_home"
     },
@@ -21,8 +21,8 @@
     "intro_home": {
       "background": "bg_bedroom.png",
       "lines": [
-        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "ok. one apology text. normal. calm." },
-        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "BRO just slide into her DMs. worst case? you slip.", "effect": "bounce" },
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "ok. one apology text. ummm... i'm sweating" },
+        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "BRO just slide into her DMs. What's the worst that can happen?", "effect": "bounce" },
         { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "she's ALREADY typing?!", "effect": "shake" }
       ],
       "next": "level:apology"
@@ -49,8 +49,8 @@
       "background": "bg_classroom.png",
       "lines": [
         { "speaker": "crush", "sprite": "story_crush_amused_sheet.png", "position": "right", "text": "ok you're weirder than i expected.", "effect": "slideIn" },
-        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "is that good weird or bad weird?" },
-        { "speaker": "crush", "sprite": "story_crush_amused_sheet.png", "position": "right", "text": "still deciding." }
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "oh umm is that like, a good thing?" },
+        { "speaker": "crush", "sprite": "story_crush_amused_sheet.png", "position": "right", "text": "hmm... still deciding." }
       ],
       "next": "level:teasing"
     },
@@ -59,7 +59,7 @@
       "lines": [
         { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "that conversation was a slip 'n slide." },
         { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "she's typing. not typing. typing. NOT typing." },
-        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "again! small talk is just talk. small.", "effect": "bounce" }
+        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "again! small talk is just talk. you can do this!!", "effect": "bounce" }
       ],
       "next": "retry"
     },
@@ -68,8 +68,8 @@
       "background": "bg_corridor.png",
       "lines": [
         { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "she's TEASING you. teasing is basically flirting!", "effect": "bounce" },
-        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "or basically bullying." },
-        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "...at this school it's the same thing." }
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "or i dunno... making fun of me." },
+        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "...it's the same thing!!" }
       ],
       "next": "level:courage"
     },
@@ -87,16 +87,16 @@
       "lines": [
         { "speaker": "player", "sprite": "story_player_happy_sheet.png", "position": "left", "text": "she's going to the dance?! to THE dance?!", "effect": "bounce" },
         { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "ASK. HER. NOW." },
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "my soles are sweating. is that normal." }
+        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "i'm sweating so much. is that normal." }
       ],
       "next": "level:question"
     },
     "fail_courage": {
       "background": "bg_bedroom.png",
       "lines": [
-        { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "ok. that was a faceplant." },
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "my heart is going a hundred miles an hour." },
-        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "again. same speed, less panic." }
+        { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "ok. that was a complete disaster." },
+        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "why did i send that omggg why did i send that." },
+        { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "again. againn." }
       ],
       "next": "retry"
     },
@@ -105,7 +105,7 @@
       "background": "bg_bedroom.png",
       "lines": [
         { "speaker": "friend", "sprite": "story_friend_unsure_sheet.png", "position": "right", "text": "...bro." },
-        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "i was SO close. i could feel it.", "effect": "shake" },
+        { "speaker": "player", "sprite": "story_player_panic_sheet.png", "position": "left", "text": "...", "effect": "shake" },
         { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "last try. don't slip." }
       ],
       "next": "retry"
