@@ -1,6 +1,5 @@
 {
   "story_player_nervous_sheet.png": {"frameWidth": 100, "frameHeight": 150, "frames": 4, "fps": 2, "loop": true},
-  "story_player_happy_sheet.png": {"frameWidth": 100, "frameHeight": 150, "frames": 4, "fps": 2, "loop": true},
   "story_friend_hype_sheet.png": {"frameWidth": 100, "frameHeight": 150, "frames": 4, "fps": 2, "loop": true},
   "story_friend_unsure_sheet.png": {"frameWidth": 100, "frameHeight": 150, "frames": 4, "fps": 2, "loop": true},
   "story_crush_neutral_sheet.png": {"frameWidth": 100, "frameHeight": 150, "frames": 4, "fps": 2, "loop": true},

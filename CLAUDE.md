@@ -204,7 +204,7 @@ assets/
 
 If an asset is added that isn't in this table, add it to the table.
 
-Story sprite sheets the current `story.json` uses (each needs an entry in `data/sprites.json`): `story_player_nervous_sheet.png`, `story_player_happy_sheet.png`, `story_player_slip_sheet.png`, `story_friend_hype_sheet.png`, `story_friend_unsure_sheet.png`, `story_crush_neutral_sheet.png`, `story_crush_amused_sheet.png`.
+Story sprite sheets the current `story.json` uses (each needs an entry in `data/sprites.json`): `story_player_nervous_sheet.png`, `story_player_slip_sheet.png`, `story_friend_hype_sheet.png`, `story_friend_unsure_sheet.png`, `story_crush_neutral_sheet.png`, `story_crush_amused_sheet.png`.
 
 ## Level data format (`data/levels.json`)
 

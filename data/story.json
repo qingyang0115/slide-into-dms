@@ -95,7 +95,7 @@
     "after_courage": {
       "background": "bg_bedroom.png",
       "lines": [
-        { "speaker": "player", "sprite": "story_player_happy_sheet.png", "position": "left", "text": "she's going to the dance?! to THE dance?!", "effect": "bounce" },
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "she's going to the dance?! to THE dance?!", "effect": "bounce" },
         { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "right", "text": "ASK. HER. NOW." },
         { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "i'm sweating so much. is that normal." }
       ],
@@ -126,7 +126,7 @@
       "lines": [
         { "text": "the next morning. corridor B. the floor is freshly mopped. again." },
         { "speaker": "crush", "sprite": "story_crush_amused_sheet.png", "position": "right", "text": "walk with me to class? try not to slip this time.", "effect": "slideIn" },
-        { "speaker": "player", "sprite": "story_player_happy_sheet.png", "position": "left", "text": "...no promises.", "effect": "bounce" },
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "...no promises.", "effect": "bounce" },
         { "speaker": "friend", "sprite": "story_friend_hype_sheet.png", "position": "center", "text": "I TOLD YOU. SLIDE. INTO. HER. DMS.", "effect": "slideIn" },
         { "text": "they walked to class together. Finn only slipped twice. a personal record." }
       ],
@@ -146,7 +146,7 @@
       "background": "bg_corridor.png",
       "lines": [
         { "speaker": "crush", "sprite": "story_crush_amused_sheet.png", "position": "right", "text": "that was the weirdest, funniest chat of my life. walk me to class?" },
-        { "speaker": "player", "sprite": "story_player_happy_sheet.png", "position": "left", "text": "YES. watch this smooth exit.", "effect": "bounce" },
+        { "speaker": "player", "sprite": "story_player_nervous_sheet.png", "position": "left", "text": "YES. watch this smooth exit.", "effect": "bounce" },
         { "text": "Finn spins dramatically. the floor is freshly mopped. again." },
         { "speaker": "player", "sprite": "story_player_slip_sheet.png", "position": "left", "text": "WHOOOOA—", "effect": "shake" },
         { "speaker": "crush", "sprite": "story_crush_amused_sheet.png", "position": "right", "text": "FINN!!", "effect": "shake" },

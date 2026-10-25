@@ -21,7 +21,7 @@ into this folder and reload the page (a normal reload is enough; no hard refresh
 | `bg_corridor.png` | 900×1600 | Corridor background (5 scenes: the intro crash, two teasing scenes, 2 endings) |
 | `char_crush_neutral.png` | 192×192 | Clover's avatar, neutral face |
 | `char_player_idle.png` | 192×192 | Finn's avatar, idle face |
-| `story_player_nervous_sheet.png` | 400×150 (4 frames of 100×150) | Finn, nervous (6 scenes) |
+| `story_player_nervous_sheet.png` | 400×150 (4 frames of 100×150) | Finn, nervous (9 scenes) |
 | `story_player_slip_sheet.png` | 400×150 (4 frames of 100×150) | Finn mid-slip (intro crash, bad ending) |
 | `story_crush_neutral_sheet.png` | 400×150 (4 frames of 100×150) | Clover, neutral (intro, neutral ending) |
 | `story_friend_hype_sheet.png` | 400×150 (4 frames of 100×150) | Zig, hyped (9 scenes) |
@@ -65,7 +65,6 @@ it will look softer than the rest. For crisper sprites, export frames at **400×
 | `story_player_slip_sheet.png` | same as the other sheets | Finn slipping/panicking. Used in 9 scenes (intro, home, group chat, all 5 fail scenes, after courage). |
 | `story_friend_unsure_sheet.png` | same | Zig, unsure. Used in the group chat beat and 4 fail scenes. |
 | `story_crush_amused_sheet.png` | same | Clover, amused; used after small talk, in all 3 endings, and for surprised reactions in the crash and bad ending. |
-| `story_player_happy_sheet.png` | same | Finn, happy. Used after courage and in the good and bad endings. |
 | `bubble_speech.png` | about 820×340, stretches | Speech bubble for every story line (a rounded box; the name tag is drawn separately). |
 
 ### 3. Title, ending and menu screens
