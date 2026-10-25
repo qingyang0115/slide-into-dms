@@ -88,6 +88,16 @@ const UI = {
   },
   clamp01(v) { return Math.max(0, Math.min(1, v)); },
 
+  // NEW: dark translucent rounded panel. Draw it BEFORE whatever sits on top of it.
+  panel(x, y, w, h, alpha = 0.55, radius = 18) {
+    ctx.save();
+    ctx.fillStyle = `rgba(20, 16, 40, ${alpha})`;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, radius);
+    ctx.fill();
+    ctx.restore();
+  },
+  
   inside(r, x, y) {
     return x >= r.cx - r.w / 2 && x <= r.cx + r.w / 2 && y >= r.cy - r.h / 2 && y <= r.cy + r.h / 2;
   },
@@ -363,6 +373,12 @@ const TitleScreen = {
     // Ending icons: lit once cleared.
     const list = Endings.list();
     if (list.length) {
+      // NEW: panel behind the "ENDINGS n / 3" label, the icons and their names.
+      // Derived from SCREEN_CONFIG so it follows the icons if anyone moves them.
+      const top = c.icons.y - c.icons.size / 2 - 40;
+      const bottom = c.icons.y + c.icons.size / 2 + 34;
+      UI.panel(45, top, 360, bottom - top);
+
       ctx.save();
       ctx.fillStyle = 'rgba(255,255,255,0.85)';
       ctx.font = 'bold 13px system-ui, sans-serif';
@@ -374,6 +390,9 @@ const TitleScreen = {
       ctx.restore();
       UI.iconRow(c.icons, this.t, (e) => ({ lit: Endings.has(e.id) }));
     }
+
+    UI.panel(95, 707, 260, 30, 0.5, 15);   // NEW: behind the Space / Enter hint
+    UI.panel(c.reset.cx - 105, c.reset.cy - c.reset.h / 2 - 2, 210, c.reset.h + 4, 0.45, 11); // NEW: behind "reset progress"
 
     drawCenteredText(`Space / Enter: start     M: ${Sfx.muted ? 'unmute' : 'mute'}`, 722, 12, '#ddd');
     const armed = this.resetArm > 0;
