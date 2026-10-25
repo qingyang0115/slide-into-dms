@@ -130,7 +130,8 @@ Levels must offer enough of each tone for every ending to be reachable (flirty a
 - **Plain HTML + CSS + JavaScript**, using **Canvas 2D** for the bullet hell play area. No build step, no framework. HTML/CSS is fine for menus, chat UI and story speech bubbles.
 - Animation: spritesheet frame cycling in JS (canvas or CSS `background-position`), CSS transitions/keyframes for slides, bounces, shakes and fades.
 - Must run by opening `index.html` through a simple local server (`npx serve` or `python -m http.server`).
-- Target: **itch.io HTML5 upload** (zip the folder). Keep all paths relative.
+- Target: **itch.io HTML5 upload** (zip the folder). Keep all paths relative. The upload must contain `index.html`, `style.css`, `src/`, `data/` and `assets/` (the GitHub Actions workflow `.github/workflows/itch.yml` builds this with `git archive` so nothing tracked is forgotten, and fails if `style.css` is missing). Without `style.css` the game is off-centre with scrollbars in wide frames and only looks right in narrow ones.
+- itch.io embed settings: a portrait viewport such as 360×640 or 450×800 and the **fullscreen button** enabled. The game rescales to the live frame size every frame, so any size works.
 - Fixed logical resolution (e.g. 450×800 portrait, phone-shaped), scaled to fit the window. Must work with **mouse and keyboard** (WASD/arrows to move, Shift for slow-focus movement). Touch support is a stretch goal.
 
 ## File structure

@@ -14,8 +14,12 @@ jobs:
 
       - name: Assemble build
         run: |
+          # Every tracked file (so a new top-level file like style.css can't be forgotten), minus dev-only ones.
           mkdir dist
-          cp -r index.html assets data src dist/
+          git archive HEAD | tar -x -C dist
+          rm -rf dist/.github dist/CLAUDE.md dist/assets/art/README.md
+          # Fail the deploy instead of shipping a broken game.
+          test -f dist/index.html && test -f dist/style.css && test -d dist/src && test -d dist/data
 
       - name: Install butler
         run: |

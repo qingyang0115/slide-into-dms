@@ -42,11 +42,25 @@ const gameEl = document.getElementById('game');
 
 // ---------- Scaling ----------
 // Keep the 450x800 logical screen, scale the whole #game box to fit the window.
+// The size is re-checked every frame (checkWindowSize in frame()), not only on `resize`, so the game stays
+// correct when a host page like itch.io sizes its iframe late or without firing an event.
+let lastW = 0, lastH = 0;
 function fitToWindow() {
-  const scale = Math.min(window.innerWidth / CONFIG.width, window.innerHeight / CONFIG.height);
+  const de = document.documentElement;
+  const w = de.clientWidth || window.innerWidth, h = de.clientHeight || window.innerHeight;
+  if (w < 1 || h < 1) return;          // frame not laid out yet: never apply scale(0); the next frame retries
+  lastW = w;
+  lastH = h;
+  const scale = Math.min(w / CONFIG.width, h / CONFIG.height);
   gameEl.style.transform = `scale(${scale})`;
 }
+function checkWindowSize() {
+  const de = document.documentElement;
+  if ((de.clientWidth || window.innerWidth) !== lastW || (de.clientHeight || window.innerHeight) !== lastH) fitToWindow();
+}
 window.addEventListener('resize', fitToWindow);
+window.addEventListener('orientationchange', fitToWindow);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', fitToWindow);
 fitToWindow();
 
 // ---------- Input ----------
@@ -392,6 +406,7 @@ let lastTime = 0;
 function frame(time) {
   const dt = Math.min(0.05, (time - lastTime) / 1000 || 0); // clamp big gaps (tab switch)
   lastTime = time;
+  checkWindowSize();
 
   if (current.update) current.update(dt);
   ctx.clearRect(0, 0, CONFIG.width, CONFIG.height);
@@ -424,6 +439,9 @@ function showBootError(msg) {
 // cache: 'no-cache' makes the browser re-check the file on every load, so edits to data/*.json show up on a
 // normal reload (otherwise a simple dev server lets the browser reuse an old copy for a while).
 const fetchOptionalJSON = (url) => fetch(url, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+
+// A deploy that forgot style.css leaves the game off-centre with scrollbars: say so in the console.
+if (getComputedStyle(document.body).display !== 'flex') console.warn('style.css did not load (or was not uploaded): the layout will be wrong.');
 
 Promise.all([
   Assets.loadAll(PRELOAD),
