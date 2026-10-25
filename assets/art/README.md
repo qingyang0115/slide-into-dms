@@ -35,6 +35,10 @@ into this folder and reload the page (a normal reload is enough; no hard refresh
 | `notif_avatar_kanbos.png` | 80×80 | Sender avatar: Kanbos (levels 2–5). |
 | `notif_avatar_shupee.png` | 80×80 | Sender avatar: Shupee (levels 2, 3, 5). |
 | `notif_avatar_glab.png` | 80×80 | Sender avatar: Glab (level 4). |
+| `bg_classroom.png` | 900×1600 | Classroom background (after small talk, neutral ending). |
+| `icon_ending_good.png` | 128×128 | Ending icon "Walk to class". One image: code darkens it while locked and lights it up when cleared. |
+| `icon_ending_neutral.png` | 128×128 | Ending icon "Just friends". |
+| `icon_ending_bad.png` | 128×128 | Ending icon "One last slip". |
 
 
 Note on the story sheets: each frame is 100×150 and is shown at 200×300, so it is scaled up 2×. That works, but
@@ -62,7 +66,6 @@ it will look softer than the rest. For crisper sprites, export frames at **400×
 | `story_friend_unsure_sheet.png` | same | Zig, unsure. Used in the group chat beat and 4 fail scenes. |
 | `story_crush_amused_sheet.png` | same | Clover, amused; used after small talk, in all 3 endings, and for surprised reactions in the crash and bad ending. |
 | `story_player_happy_sheet.png` | same | Finn, happy. Used after courage and in the good and bad endings. |
-| `bg_classroom.png` | 900×1600 | Classroom background (after small talk, neutral ending). |
 | `bubble_speech.png` | about 820×340, stretches | Speech bubble for every story line (a rounded box; the name tag is drawn separately). |
 
 ### 3. Title, ending and menu screens
@@ -70,9 +73,6 @@ it will look softer than the rest. For crisper sprites, export frames at **400×
 |---|---|---|
 | `title_logo.png` | 760×380 | Animated game logo. Static image or a spritesheet listed in `data/sprites.json`; code adds the slide-in, bob and slip. |
 | `ending_title.png` | 760×300 | "The End" title; code drops it in with a bounce. |
-| `icon_ending_good.png` | 128×128 | Ending icon "Walk to class". One image: code darkens it while locked and lights it up when cleared. |
-| `icon_ending_neutral.png` | 128×128 | Ending icon "Just friends". |
-| `icon_ending_bad.png` | 128×128 | Ending icon "One last slip". |
 | `screen_gameover.png` | 900×1600 | Game over background. Currently never shown (every failed level has a fail scene), so it is the lowest priority. |
 
 ### 4. Group chat notifications (levels 2–5)
